@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "declaration": true
+  },
+  "include": [
+    "./deploy",
+    "./test",
+    "./tasks",
+    "./typechain",
+    "./scripts",
+    "./worker",
+    "./utils"
+  ],
+  "files": [
+    "./hardhat.config.ts",
+    "./helper-hardhat-config.ts",
+    "./helper-functions.ts"
+  ]
+}

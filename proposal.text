@@ -1,0 +1,147 @@
+Project Proposal
+A. Thông Tin Chung
+● Môn học: Công nghệ Blockchain - IS6105.CH191
+● Tên đề tài: An ICO-ready Cryptocurrency (ERC-20)
+● Giảng viên hướng dẫn: Trần Hưng Nghiệp, nghiepth@uit.edu.vn
+● Thời gian thực hiện: tháng 9/2025 - tháng 12/2025
+● Nhóm: 6
+● Thành viên:
+1. Phạm Thăng Long,240101016, rider993sinus@gmail.com, 0982481842
+1. Văn Đức Ngọ, 240101020, ngovd.19@grad.uit.edu.vn, 0969510760
+2. Nguyễn Hoàng Hải, 240101008, hainh.19@grad.uit.edu.vn, 0939099298
+3. Phương Lan, 240101015, lannp.19@ms.uit.edu.vn, 0903975939
+1
+B. Nội Dung Thuyết Minh
+1. Abstract (Tóm tắt)
+Dự án này tập trung vào việc thiết kế, xây dựng và đánh giá một hệ sinh thái smart contract
+toàn diện cho một token ERC-20, đáp ứng đầy đủ các tiêu chuẩn "ICO-ready". Hệ thống bao
+gồm các module chính: (1) Token ERC-20 có chức năng mint, (2) Hợp đồng Token Sale
+(ICO) với cơ chế soft/hard cap, (3) Hợp đồng Vesting để khóa và phân bổ token theo thời
+gian, (4) Hợp đồng Staking để khuyến khích nắm giữ dài hạn, và (5) Cơ chế cung cấp và
+khóa thanh khoản trên sàn DEX (Uniswap). Sản phẩm cuối cùng là một bộ smart contract đã
+được kiểm thử, triển khai trên testnet Sepolia, kèm theo các kịch bản tương tác và báo cáo
+phân tích hiệu năng, an toàn.
+2. Introduction (Mục tiêu & Bối cảnh)
+Bối cảnh
+Các dự án blockchain thường trải qua 3 giai đoạn: ICO (bán token để raise vốn) → DEX
+listing (thanh khoản) → staking/liquidity mining (giữ giá trị & khuyến khích nắm giữ).
+Mục tiêu
+Xây dựng một prototype ICO-ready token có đầy đủ:
+● ERC-20 chuẩn OpenZeppelin
+● Token Sale (ICO contract)
+● Vesting (linear vesting với cliff)
+● Staking (lock tiers, reward emission, penalty)
+● Add Liquidity + LP Lock (Uniswap testnet)
+Câu hỏi nghiên cứu
+1. Làm thế nào để thiết kế một vesting schedule kết hợp linear vesting và cliff vesting
+để cân bằng giữa giảm áp lực bán tháo token và khuyến khích nhà đầu tư dài hạn
+sau ICO?
+2. Cơ chế staking nào (APY cố định, APY động, hoặc mô hình lai) tối ưu để giữ chân
+nhà đầu tư trong 2 năm đầu sau ICO, đồng thời giữ tỷ lệ lạm phát token dưới 10%
+mỗi năm?
+3. Đánh giá các rủi ro bảo mật và tác động đến niềm tin của nhà đầu tư khi sử dụng
+Timelock contract tự phát triển để khóa token thanh khoản (LP token) so với việc sử
+dụng các giải pháp của bên thứ ba (ví dụ: Unicrypt, Team Finance).
+3. Related Work (Khảo sát liên quan & Phạm vi)
+● OpenZeppelin Contracts: ERC20, Ownable, ReentrancyGuard, Timelock.
+● Uniswap v2/v3: add/remove liquidity, LP token.
+2
+● Token vesting patterns: Team lock, cliff, linear vesting.
+● Staking/Vault: reward emission models, lock tiers.
+Phạm vi:
+● Có:
+○ Mint, ICO Sale, Vesting, Staking, Add Liquidity + LP Lock.
+○ Các chuẩn Token và Mở rộng: Phân tích chuẩn ERC-20 của OpenZeppelin
+và các mở rộng phổ biến như ERC20Burnable, ERC20Pausable, và so sánh
+với các chuẩn khác như ERC-777 để lý giải lựa chọn của dự án.
+○ Các mô hình Token Sale: Khảo sát các mô hình ICO đã thành công và thất
+bại. Phân tích ưu/nhược điểm của mô hình giá cố định (fixed-price sale) mà
+dự án lựa chọn so với các mô hình khác
+○ Các cơ chế Vesting và Staking: Nghiên cứu các pattern vesting cho
+team/advisors và staking được áp dụng trong các dự án DeFi hàng đầu (ví
+dụ: Uniswap, SushiSwap, Aave) để rút ra các thực tiễn tốt nhất về thiết kế
+reward emission và penalty.
+● Không: Proxy contract, Multisig contract
+4. Methodology (Phương pháp dự kiến)
+Hướng tiếp cận
+Dự án sẽ được thực hiện theo hướng ứng dụng & phân tích:
+● Ứng dụng: xây dựng hệ thống hợp đồng thông minh hoàn chỉnh (ICO sale, vesting,
+staking, add liquidity + LP lock) theo chuẩn ERC-20.
+● Phân tích: so sánh, đánh giá hiệu năng và tính đúng đắn của các hợp đồng thông
+minh qua quá trình deploy và test trên testnet.
+● Nghiên cứu: tham khảo các pattern bảo mật (OpenZeppelin) và cơ chế DeFi
+(Uniswap liquidity, staking rewards) để áp dụng.
+Kỹ thuật triển khai
+● Smart contract development: viết bằng Solidity (ERC-20, TokenSale, Vesting,
+Staking, Timelock).
+● Unit testing: sử dụng Hardhat với framework test Mocha + Chai, viết test script
+bằng JavaScript/TypeScript.
+● Deployment: triển khai trên Sophia Network (EVM-compatible testnet) thông qua
+RPC.
+3
+● Security patterns: dùng các thư viện OpenZeppelin (Ownable, Pausable,
+ReentrancyGuard, SafeERC20) để đảm bảo an toàn.
+● Liquidity pool: tích hợp với Uniswap v2 Router trên testnet để add liquidity, sau đó
+lock LP tokens bằng timelock contract.
+Kỹ thuật đánh giá & độ đo
+● Correctness (tính đúng đắn):
+○ Kiểm tra unit test cho từng hợp đồng (mint, sale, vesting, staking, add
+liquidity).
+○ Kiểm tra edge case: vesting trước cliff, unstake trước hạn…
+● Security (an toàn):
+○ Test reentrancy, overflow/underflow (tự động có trong Solidity ^0.8.x).
+○ Dùng Hardhat Gas Reporter để đo mức tiêu thụ gas cho các hàm quan trọng.
+● Performance (hiệu năng):
+○ Đo gas cost trung bình cho các transaction chính: buyToken (ICO), claim
+(vesting), stake/unstake, addLiquidity.
+● Usability (khả năng sử dụng):
+○ Demo thực tế trên MetaMask kết nối Sophia Network.
+○ Kiểm tra investor có thể claim token và trade ngay sau khi pool được mở.
+Công cụ & môi trường phát triển
+● Ngôn ngữ lập trình: Solidity (smart contracts), JavaScript/TypeScript (test & scripts).
+● Frameworks: Hardhat (build, compile, test, deploy).
+● Libraries: OpenZeppelin Contracts (ERC-20, Vesting, Timelock, SafeERC20).
+● Platform: Sophia Network (EVM testnet, tương thích Ethereum).
+● Ví & Explorer: MetaMask (giao dịch), Block Explorer của Sophia testnet.
+● Khác: Ethers.js (kết nối blockchain), Hardhat Gas Reporter (đo gas), dotenv (quản lý
+private key).
+4
+5. Planning (Kế hoạch công việc)
+Tuần Công việc
+1 Khảo sát & Khởi tạo - Nghiên cứu chuẩn ERC-20, TokenSale patterns, vesting,
+staking, LP lock. - Thiết kế tokenomics + flow kiến trúc (mint → sale → vesting →
+staking → add liquidity). - Setup môi trường dev (Hardhat, OpenZeppelin, Uniswap
+SDK, testnet faucet).
+2 ERC-20 + ICO Sale - Viết ERC-20 token contract (mintable). - Viết TokenSale
+contract (soft cap / hard cap, buy bằng ETH, thời gian mở/đóng). - Unit test cơ bản
+(mua token, refund khi fail soft cap).
+3 Vesting + Staking - Viết Vesting contract (cliff + linear unlock). - Viết Staking
+contract (lock tiers 1/3/6 tháng, reward emission, early penalty). - Test Vesting +
+Staking flow (claim vesting → stake → claim rewards).
+4 Liquidity + Demo - Viết script add liquidity lên Uniswap testnet (Sepolia). - Viết LP
+Timelock contract (lock LP tokens 6–12 tháng). - Tích hợp toàn bộ flow (ICO →
+Vesting → Staking → Add Liquidity + LP Lock). - Demo testnet, quay video demo,
+viết báo cáo + slide thuyết trình.
+6. Expected Results (Kết quả dự kiến)
+Contracts:
+● ERC20 Token
+● ICO Contract
+● Staking
+Scripts và demo code:
+● Script triển khai contracts (Hardhat).
+● Script add liquidity lên Dex testnet + lock LP.
+5
+● Unit tests cơ bản (buy token, refund, vesting claim, staking rewards, lock/unlock LP).
+Demo testnet thực tế:
+● Mua token trong ICO bằng ETH testnet.
+● Claim token dần theo vesting.
+● Stake token và claim rewards.
+● Thử rút liquidity từ pool
+7. References (Tài liệu tham khảo)
+● OpenZeppelin Docs. (2023). ERC20 - OpenZeppelin Docs. [Online]. Available:
+https://docs.openzeppelin.com/contracts/4.x/erc20
+● Uniswap Labs. (2020). Uniswap v2 Core. [Online]. Available:
+https://uniswap.org/whitepaper.pdf
+● Buterin, V. (2014). A Next-Generation Smart Contract and Decentralized Application
+Platform. Ethereum Whitepaper.
+6

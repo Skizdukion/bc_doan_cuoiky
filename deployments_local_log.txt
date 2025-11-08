@@ -1,0 +1,219 @@
+Nothing to compile
+No need to generate any newer typings.
+Local network detected! Deploying mocks...
+deploying "WETH" (tx: 0x8a98bcc3eae9a30cf460a8bedcb87c3066d804dbbfcc648212499b7e42504b20)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 817067 gas
+deploying "BUSD" (tx: 0x03df3c9f5ccd2185be34a4764fa3b62b02f3b43a6b20df1506e4b8e17ee2493c)...: deployed at 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 with 1581853 gas
+deploying "USDT" (tx: 0x470e3d7194449d2c801dbd26bc55ca650fd13785485461e21861a11a4013ed16)...: deployed at 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 with 1581853 gas
+deploying "Nope" (tx: 0x700f96cd040eec532f2e5e85aad5ab2f719365817f3c7567865e04dba8002f87)...: deployed at 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 with 1541621 gas
+Mocks Deployed!
+----------------------------------------------------
+Deploying VNDC Token...
+deploying "VNDC" (tx: 0x42ba93849aecb0c2a04ecff3ae0e425a65be3012f0b030b0d3063e263d3421a0)...: deployed at 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 with 2105461 gas
+VNDC Token deployed at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+----------------------------------------------------
+Deploying TokenSale...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "TokenSale" (tx: 0x336721c7e295ef719f392a0be30e6f29f97090aebe0f42cde379480be1b505f4)...: deployed at 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 with 2975260 gas
+TokenSale deployed at: 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707
+----------------------------------------------------
+Deploying TokenVesting...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "TokenVesting" (tx: 0xe43a7b9e837f2f5d34b9a446b26a206b2ab5f6dd3eacf378aaafad5fb0de8a73)...: deployed at 0x0165878A594ca255338adfa4d48449f69242Eb8F with 2949933 gas
+TokenVesting deployed at: 0x0165878A594ca255338adfa4d48449f69242Eb8F
+----------------------------------------------------
+Deploying StakingContract...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "StakingContract" (tx: 0x7ac85f080359d122d1f5da32aa652877b11c92a70f711050b136eaa5878c83fc)...: deployed at 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 with 2931420 gas
+StakingContract deployed at: 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
+----------------------------------------------------
+Deploying PoolFactory...
+deploying "Factory" (tx: 0x29611b72bc0f2a6edb76ad5662546a30a6d916ae33190496bf8ac9c28bd14d1b)...: deployed at 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 with 4971512 gas
+PoolFactory deployed at: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+----------------------------------------------------
+Deploying Router...
+deploying "Router" (tx: 0x9763261ab8e74468efda410df89d93fcf1159ea7861b347b810cccabb964d5a5)...: deployed at 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 with 5218223 gas
+Router deployed at: 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318
+Factory address: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+WETH address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+----------------------------------------------------
+Adding liquidity to VNDC/ETH pool...
+⚠️  Soft cap not reached. Cannot add liquidity.
+Total raised: 0.0 ETH
+----------------------------------------------------
+Deploying LPTimelock...
+deploying "LPTimelock" (tx: 0xad7ce3dc5a8c32873f54e5ed649fec845296c1d3473eabbe5533c4d84520dac6)...: deployed at 0x610178dA211FEF7D417bC0e6FeD39F05609AD788 with 1985725 gas
+LPTimelock deployed at: 0x610178dA211FEF7D417bC0e6FeD39F05609AD788
+Done in 2.87s.
+(cold_dm_platform) ➜  vndc git:(ico_ready) ✗ yarn hardhat deploy
+yarn run v1.22.22
+$ /home/long/vndc/node_modules/.bin/hardhat deploy
+Nothing to compile
+No need to generate any newer typings.
+Local network detected! Deploying mocks...
+deploying "WETH" (tx: 0x8a98bcc3eae9a30cf460a8bedcb87c3066d804dbbfcc648212499b7e42504b20)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 817067 gas
+deploying "BUSD" (tx: 0x03df3c9f5ccd2185be34a4764fa3b62b02f3b43a6b20df1506e4b8e17ee2493c)...: deployed at 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 with 1581853 gas
+deploying "USDT" (tx: 0x470e3d7194449d2c801dbd26bc55ca650fd13785485461e21861a11a4013ed16)...: deployed at 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 with 1581853 gas
+deploying "Nope" (tx: 0x700f96cd040eec532f2e5e85aad5ab2f719365817f3c7567865e04dba8002f87)...: deployed at 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 with 1541621 gas
+Mocks Deployed!
+----------------------------------------------------
+Deploying VNDC Token...
+deploying "VNDC" (tx: 0x42ba93849aecb0c2a04ecff3ae0e425a65be3012f0b030b0d3063e263d3421a0)...: deployed at 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 with 2105461 gas
+VNDC Token deployed at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+----------------------------------------------------
+Deploying TokenSale...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "TokenSale" (tx: 0x336721c7e295ef719f392a0be30e6f29f97090aebe0f42cde379480be1b505f4)...: deployed at 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 with 2975260 gas
+TokenSale deployed at: 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707
+----------------------------------------------------
+Deploying TokenVesting...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "TokenVesting" (tx: 0xe43a7b9e837f2f5d34b9a446b26a206b2ab5f6dd3eacf378aaafad5fb0de8a73)...: deployed at 0x0165878A594ca255338adfa4d48449f69242Eb8F with 2949933 gas
+TokenVesting deployed at: 0x0165878A594ca255338adfa4d48449f69242Eb8F
+----------------------------------------------------
+Deploying StakingContract...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "StakingContract" (tx: 0x7ac85f080359d122d1f5da32aa652877b11c92a70f711050b136eaa5878c83fc)...: deployed at 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 with 2931420 gas
+StakingContract deployed at: 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
+----------------------------------------------------
+Deploying PoolFactory...
+deploying "Factory" (tx: 0x29611b72bc0f2a6edb76ad5662546a30a6d916ae33190496bf8ac9c28bd14d1b)...: deployed at 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 with 4971512 gas
+PoolFactory deployed at: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+----------------------------------------------------
+Deploying Router...
+deploying "Router" (tx: 0x9763261ab8e74468efda410df89d93fcf1159ea7861b347b810cccabb964d5a5)...: deployed at 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 with 5218223 gas
+Router deployed at: 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318
+Factory address: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+WETH address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+----------------------------------------------------
+Adding liquidity to VNDC/ETH pool...
+🌐 Local network detected. Simulating token purchases to reach soft cap...
+Starting token sale...
+Minting 400000000.0 tokens to TokenSale...
+Tokens minted to TokenSale
+Token sale started
+Using 5 buyers to reach soft cap...
+Buyer 1 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 10.0 ETH
+Buyer 2 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 20.0 ETH
+Buyer 3 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 30.0 ETH
+Buyer 4 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 40.0 ETH
+Buyer 5 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 50.0 ETH
+✅ Soft cap reached!
+⚠️  Sale is still active. Ending sale first...
+Sale ended successfully
+Liquidity parameters:
+  VNDC tokens: 100000000.0
+  ETH amount: 25.0
+  Total raised: 50.0 ETH
+Minting tokens for liquidity...
+Minted 100000000.0 tokens
+Withdrawing ETH from TokenSale...
+ETH withdrawn from TokenSale
+Approving Router to spend tokens...
+Token approval completed
+Adding liquidity...
+✅ Liquidity added successfully!
+Pair created at: 0xA12D378dcB6630C9C949083EB5848123B6FfFb49
+LP tokens received: 49999.999999999999999
+----------------------------------------------------
+Deploying LPTimelock...
+deploying "LPTimelock" (tx: 0xd2d3e66086b98c53be5a8fb9fca26e9cb3253d70e3db5e7becf3115268ad3868)...: deployed at 0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE with 1985725 gas
+LPTimelock deployed at: 0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE
+Done in 2.43s.
+(cold_dm_platform) ➜  vndc git:(ico_ready) ✗ yarn hardhat deploy
+yarn run v1.22.22
+$ /home/long/vndc/node_modules/.bin/hardhat deploy
+Nothing to compile
+No need to generate any newer typings.
+Local network detected! Deploying mocks...
+deploying "WETH" (tx: 0x8a98bcc3eae9a30cf460a8bedcb87c3066d804dbbfcc648212499b7e42504b20)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 817067 gas
+deploying "BUSD" (tx: 0x03df3c9f5ccd2185be34a4764fa3b62b02f3b43a6b20df1506e4b8e17ee2493c)...: deployed at 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 with 1581853 gas
+deploying "USDT" (tx: 0x470e3d7194449d2c801dbd26bc55ca650fd13785485461e21861a11a4013ed16)...: deployed at 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 with 1581853 gas
+deploying "Nope" (tx: 0x700f96cd040eec532f2e5e85aad5ab2f719365817f3c7567865e04dba8002f87)...: deployed at 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 with 1541621 gas
+Mocks Deployed!
+----------------------------------------------------
+Deploying VNDC Token...
+deploying "VNDC" (tx: 0x42ba93849aecb0c2a04ecff3ae0e425a65be3012f0b030b0d3063e263d3421a0)...: deployed at 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 with 2105461 gas
+VNDC Token deployed at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+----------------------------------------------------
+Deploying TokenSale...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "TokenSale" (tx: 0x336721c7e295ef719f392a0be30e6f29f97090aebe0f42cde379480be1b505f4)...: deployed at 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 with 2975260 gas
+TokenSale deployed at: 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707
+----------------------------------------------------
+Deploying TokenVesting...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "TokenVesting" (tx: 0xe43a7b9e837f2f5d34b9a446b26a206b2ab5f6dd3eacf378aaafad5fb0de8a73)...: deployed at 0x0165878A594ca255338adfa4d48449f69242Eb8F with 2949933 gas
+TokenVesting deployed at: 0x0165878A594ca255338adfa4d48449f69242Eb8F
+----------------------------------------------------
+Deploying StakingContract...
+Using VNDC token at: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+deploying "StakingContract" (tx: 0x7ac85f080359d122d1f5da32aa652877b11c92a70f711050b136eaa5878c83fc)...: deployed at 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 with 2931420 gas
+StakingContract deployed at: 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
+----------------------------------------------------
+Deploying PoolFactory...
+deploying "Factory" (tx: 0x29611b72bc0f2a6edb76ad5662546a30a6d916ae33190496bf8ac9c28bd14d1b)...: deployed at 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 with 4971512 gas
+PoolFactory deployed at: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+----------------------------------------------------
+Deploying Router...
+deploying "Router" (tx: 0x9763261ab8e74468efda410df89d93fcf1159ea7861b347b810cccabb964d5a5)...: deployed at 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 with 5218223 gas
+Router deployed at: 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318
+Factory address: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+WETH address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+----------------------------------------------------
+Adding liquidity to VNDC/ETH pool...
+🌐 Local network detected. Simulating token purchases to reach soft cap...
+Starting token sale...
+Minting 400000000.0 tokens to TokenSale...
+Tokens minted to TokenSale
+Token sale started
+Using 5 buyers to reach soft cap...
+Buyer 1 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 10.0 ETH
+Buyer 2 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 20.0 ETH
+Buyer 3 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 30.0 ETH
+Buyer 4 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 40.0 ETH
+Buyer 5 purchasing 10.0 ETH worth of tokens...
+✅ Purchase successful. Total raised: 50.0 ETH
+✅ Soft cap reached!
+⚠️  Sale is still active. Ending sale first...
+Sale ended successfully
+Liquidity parameters:
+  VNDC tokens: 100000000.0
+  ETH amount: 25.0
+  Total raised: 50.0 ETH
+Minting tokens for liquidity...
+Minted 100000000.0 tokens
+Withdrawing ETH from TokenSale...
+ETH withdrawn from TokenSale
+Approving Router to spend tokens...
+Token approval completed
+Adding liquidity...
+✅ Liquidity added successfully!
+Pair created at: 0xA12D378dcB6630C9C949083EB5848123B6FfFb49
+LP tokens received: 49999.999999999999999
+----------------------------------------------------
+Deploying LPTimelock...
+deploying "LPTimelock" (tx: 0xd2d3e66086b98c53be5a8fb9fca26e9cb3253d70e3db5e7becf3115268ad3868)...: deployed at 0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE with 1985725 gas
+LPTimelock deployed at: 0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE
+----------------------------------------------------
+Liquidity pool found. Attempting to lock LP tokens...
+Found 49999.999999999999999 LP tokens in deployer's account
+Approving LPTimelock to spend LP tokens...
+Approval completed
+Locking 49999.999999999999999 LP tokens for 12 months...
+Beneficiary: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+✅ LP tokens locked successfully!
+Lock ID: 0
+LP Token: 0xA12D378dcB6630C9C949083EB5848123B6FfFb49
+Amount: 49999.999999999999999
+Unlock Time: 2026-11-08T04:20:11.000Z
+Beneficiary: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Done in 2.48s.
