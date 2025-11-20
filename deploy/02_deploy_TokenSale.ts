@@ -20,14 +20,30 @@ const deployTokenSale: DeployFunction = async function (hre: HardhatRuntimeEnvir
 
   log(`Using VNDC token at: ${vndcAddress}`);
 
+  const router = await get("Router");
+  const routerAddress = router.address;
+  log(`Using Router at: ${routerAddress}`);
+
   const tokenSale = await deploy("TokenSale", {
     from: deployer,
-    args: [vndcAddress],
+    args: [vndcAddress, routerAddress],
     log: true,
     waitConfirmations: 1,
   });
 
   log(`TokenSale deployed at: ${tokenSale.address}`);
+
+  // Transfer VNDC ownership to TokenSale so it becomes the sole minter
+  const vndcContract = await ethers.getContractAt("VNDC", vndcAddress);
+  const currentOwner = await vndcContract.owner();
+  if (currentOwner.toLowerCase() !== tokenSale.address.toLowerCase()) {
+    log("Transferring VNDC ownership to TokenSale...");
+    const transferTx = await vndcContract.transferOwnership(tokenSale.address);
+    await transferTx.wait();
+    log("VNDC ownership transferred");
+  } else {
+    log("VNDC already owned by TokenSale");
+  }
 
   // Verify the deployment
   if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {
@@ -35,7 +51,7 @@ const deployTokenSale: DeployFunction = async function (hre: HardhatRuntimeEnvir
     try {
       await hre.run("verify:verify", {
         address: tokenSale.address,
-        constructorArguments: [vndcAddress],
+        constructorArguments: [vndcAddress, routerAddress],
       });
     } catch (error) {
       log("Verification failed:", error);
@@ -47,6 +63,6 @@ const deployTokenSale: DeployFunction = async function (hre: HardhatRuntimeEnvir
 
 deployTokenSale.id = "TokenSale";
 deployTokenSale.tags = ["TokenSale", "all"];
-deployTokenSale.dependencies = ["VNDC"];
+deployTokenSale.dependencies = ["VNDC", "Router"];
 export default deployTokenSale;
 

@@ -29,6 +29,18 @@ const deployVesting: DeployFunction = async function (hre: HardhatRuntimeEnviron
 
   log(`TokenVesting deployed at: ${vesting.address}`);
 
+  // Wire vesting contract to TokenSale if not already set
+  const tokenSale = await ethers.getContract("TokenSale");
+  const currentVesting = await tokenSale.tokenVesting();
+  if (currentVesting === ethers.ZeroAddress) {
+    log("Linking TokenVesting to TokenSale...");
+    const tx = await tokenSale.setTokenVesting(vesting.address);
+    await tx.wait();
+    log("TokenVesting linked");
+  } else {
+    log(`TokenSale already linked to vesting at ${currentVesting}`);
+  }
+
   // Verify the deployment
   if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {
     log("Verifying contract...");

@@ -16,16 +16,6 @@ import "./tasks";
 
 dotenv.config();
 
-const MAINNET_RPC_URL =
-  process.env.MAINNET_RPC_URL ||
-  process.env.ALCHEMY_MAINNET_RPC_URL ||
-  "https://eth-mainnet.alchemyapi.io/v2/your-api-key";
-const RINKEBY_RPC_URL =
-  process.env.RINKEBY_RPC_URL || "https://eth-rinkeby.alchemyapi.io/v2/your-api-key";
-const KOVAN_RPC_URL =
-  process.env.KOVAN_RPC_URL || "https://eth-kovan.alchemyapi.io/v2/your-api-key";
-const POLYGON_MAINNET_RPC_URL =
-  process.env.POLYGON_MAINNET_RPC_URL || "https://polygon-mainnet.alchemyapi.io/v2/your-api-key";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 // optional
 const MNEMONIC = process.env.MNEMONIC || "Your mnemonic";
@@ -90,24 +80,6 @@ const config: HardhatUserConfig = {
     //   saveDeployments: true,
     //   chainId: 1,
     // },
-    // polygon: {
-    //   url: POLYGON_MAINNET_RPC_URL,
-    //   accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
-    //   saveDeployments: true,
-    //   chainId: 137,
-    // },
-    bscTestnet: {
-      url: process.env.BSCTESTNET_RPC_URL,
-      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
-      saveDeployments: true,
-      chainId: 97,
-    },
-    bscMainnet: {
-      url: process.env.BSCMAINNET_RPC_URL,
-      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
-      saveDeployments: true,
-      chainId: 56,
-    },
   },
   etherscan: {
     // yarn hardhat verify --network <NETWORK> <CONTRACT_ADDRESS> <CONSTRUCTOR_PARAMETERS>
@@ -115,8 +87,6 @@ const config: HardhatUserConfig = {
       // rinkeby: ETHERSCAN_API_KEY,
       // kovan: ETHERSCAN_API_KEY,
       // polygon: POLYGONSCAN_API_KEY,
-      bscTestnet: process.env.BSCSCAN_API_KEY,
-      bsc: process.env.BSCSCAN_API_KEY,
     },
   },
   gasReporter: {

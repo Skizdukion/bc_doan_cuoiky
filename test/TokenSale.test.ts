@@ -1,12 +1,17 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { VNDC, TokenSale } from "../typechain";
+import { VNDC, TokenSale, TokenVesting } from "../typechain";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
+import { Contract } from "ethers";
 
 describe("TokenSale", function () {
   let vndc: VNDC;
   let tokenSale: TokenSale;
+  let tokenVesting: TokenVesting;
+  let router: Contract;
+  let factory: Contract;
+  let weth: Contract;
   let owner: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
@@ -23,19 +28,34 @@ describe("TokenSale", function () {
   beforeEach(async function () {
     [owner, user1, user2, user3, user4, user5] = await ethers.getSigners();
 
-    // Deploy VNDC token
     const VNDCFactory = await ethers.getContractFactory("VNDC");
     vndc = await VNDCFactory.deploy();
     await vndc.waitForDeployment();
 
-    // Deploy TokenSale
+    const WETHFactory = await ethers.getContractFactory("WETH9");
+    weth = await WETHFactory.deploy();
+    await weth.waitForDeployment();
+
+    const FactoryFactory = await ethers.getContractFactory("PoolFactory");
+    factory = await FactoryFactory.deploy(owner.address);
+    await factory.waitForDeployment();
+
+    const RouterFactory = await ethers.getContractFactory("Router");
+    router = await RouterFactory.deploy(await factory.getAddress(), await weth.getAddress());
+    await router.waitForDeployment();
+
     const TokenSaleFactory = await ethers.getContractFactory("TokenSale");
-    tokenSale = await TokenSaleFactory.deploy(await vndc.getAddress());
+    tokenSale = await TokenSaleFactory.deploy(await vndc.getAddress(), await router.getAddress());
     await tokenSale.waitForDeployment();
 
-    // Mint tokens to TokenSale contract (enough for hard cap)
-    const tokensNeeded = HARD_CAP * TOKEN_PRICE / ethers.parseEther("1");
-    await vndc.mint(await tokenSale.getAddress(), tokensNeeded);
+    // Transfer ownership so that TokenSale is the sole minter
+    await vndc.transferOwnership(await tokenSale.getAddress());
+
+    const TokenVestingFactory = await ethers.getContractFactory("TokenVesting");
+    tokenVesting = await TokenVestingFactory.deploy(await vndc.getAddress());
+    await tokenVesting.waitForDeployment();
+
+    await tokenSale.setTokenVesting(await tokenVesting.getAddress());
   });
 
   describe("Deployment", function () {
@@ -53,6 +73,7 @@ describe("TokenSale", function () {
       expect(await tokenSale.TOKEN_PRICE()).to.equal(TOKEN_PRICE);
       expect(await tokenSale.MIN_PURCHASE()).to.equal(MIN_PURCHASE);
       expect(await tokenSale.MAX_PURCHASE()).to.equal(MAX_PURCHASE);
+      expect(await tokenSale.tokenVesting()).to.equal(await tokenVesting.getAddress());
     });
   });
 
@@ -99,13 +120,15 @@ describe("TokenSale", function () {
     it("Should allow users to buy tokens", async function () {
       const ethAmount = ethers.parseEther("1");
       const expectedTokens = (ethAmount * TOKEN_PRICE) / ethers.parseEther("1");
+      const expectedInvestorShare = (expectedTokens * 3000n) / 10000n;
 
       await expect(
         tokenSale.connect(user1).buyTokens({ value: ethAmount })
       ).to.emit(tokenSale, "TokensPurchased")
         .withArgs(user1.address, ethAmount, expectedTokens);
 
-      expect(await vndc.balanceOf(user1.address)).to.equal(expectedTokens);
+      expect(await tokenSale.purchasedTokens(user1.address)).to.equal(expectedInvestorShare);
+      expect(await vndc.balanceOf(user1.address)).to.equal(0);
       expect(await tokenSale.totalRaised()).to.equal(ethAmount);
     });
 
@@ -145,8 +168,6 @@ describe("TokenSale", function () {
     });
 
     it("Should mark soft cap as reached", async function () {
-      // Buy in multiple transactions to reach soft cap (50 ETH)
-      // Each user can contribute max 10 ETH, so need 5 users
       const amountPerUser = ethers.parseEther("10");
       await tokenSale.connect(user1).buyTokens({ value: amountPerUser });
       await tokenSale.connect(user2).buyTokens({ value: amountPerUser });
@@ -239,41 +260,47 @@ describe("TokenSale", function () {
     });
   });
 
-  describe("Withdrawing Funds", function () {
+  describe("Finalization and claims", function () {
     beforeEach(async function () {
       const latest = Number(await time.latest());
-      const startTime = latest; // Use current time
-      const endTime = startTime + 86400;
-      await tokenSale.startSale(startTime, endTime, false);
-    });
-
-    it("Should allow owner to withdraw after soft cap reached", async function () {
-      // Buy in multiple transactions to reach soft cap (50 ETH)
-      // Each user can contribute max 10 ETH, so need 5 users
+      const endTime = latest + 86400;
+      await tokenSale.startSale(latest, endTime, false);
       const amountPerUser = ethers.parseEther("10");
       await tokenSale.connect(user1).buyTokens({ value: amountPerUser });
       await tokenSale.connect(user2).buyTokens({ value: amountPerUser });
       await tokenSale.connect(user3).buyTokens({ value: amountPerUser });
       await tokenSale.connect(user4).buyTokens({ value: amountPerUser });
       await tokenSale.connect(user5).buyTokens({ value: amountPerUser });
-      
-      // End sale first (withdrawFunds requires sale not active or hard cap reached)
       await tokenSale.endSale();
-      
-      const balanceBefore = await ethers.provider.getBalance(owner.address);
-      await tokenSale.withdrawFunds();
-      const balanceAfter = await ethers.provider.getBalance(owner.address);
-
-      expect(await tokenSale.fundsWithdrawn()).to.be.true;
     });
 
-    it("Should not allow withdrawal if soft cap not reached", async function () {
-      await tokenSale.connect(user1).buyTokens({ value: ethers.parseEther("10") });
-      await tokenSale.endSale();
+    it("Finalizes sale, mints allocations, and adds liquidity", async function () {
+      await tokenSale.finalizeSale();
+      expect(await tokenSale.finalized()).to.be.true;
+      expect(await tokenSale.liquidityAdded()).to.be.true;
 
+      const base = await tokenSale.totalTokensSold();
+      const expectedInvestor = (base * 3000n) / 10000n;
+      const expectedLiquidity = (base * 3000n) / 10000n;
+      const expectedTeam = base - expectedInvestor - expectedLiquidity;
+
+      expect(await tokenSale.totalInvestorAllocation()).to.equal(expectedInvestor);
+      expect(await tokenSale.totalLiquidityAllocation()).to.equal(expectedLiquidity);
+      expect(await tokenSale.totalTeamAllocation()).to.equal(expectedTeam);
+      expect(await vndc.balanceOf(await tokenVesting.getAddress())).to.equal(expectedTeam);
+
+      const pairAddress = await factory.getPair(await vndc.getAddress(), await weth.getAddress());
+      expect(pairAddress).to.not.equal(ethers.ZeroAddress);
+    });
+
+    it("Allows investor claims once finalized", async function () {
+      await tokenSale.finalizeSale();
+      const owed = await tokenSale.purchasedTokens(user1.address);
+      await tokenSale.connect(user1).claimTokens();
+      expect(await vndc.balanceOf(user1.address)).to.equal(owed);
       await expect(
-        tokenSale.withdrawFunds()
-      ).to.be.revertedWith("TokenSale: Soft cap not reached");
+        tokenSale.connect(user1).claimTokens()
+      ).to.be.revertedWith("TokenSale: No tokens to claim");
     });
   });
 
