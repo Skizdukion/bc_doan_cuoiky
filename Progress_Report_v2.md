@@ -49,20 +49,7 @@ VNDC đặt mục tiêu xây dựng một pipeline phát hành token khép kín,
 
 # 2. METHODOLOGY
 
-```mermaid
-graph TD
-    Investor((Investor)) -->|contribute ETH| TokenSale["TokenSale (only minter)"]
-    TokenSale -->|all ETH + 30% VNDC| DEX[Auto Liquidity]
-
-    TokenSale -->|claim 30% VNDC| Investor
-    TokenSale -->|mint 40% VNDC| TokenVesting["TokenVesting (Dev Team/Advisor)"]
-    TokenSale -->|retain 30% VNDC| LiquidityReserve["Liquidity VNDC Share"]
-    LiquidityReserve -->|paired with ETH| DEX
-    TokenVesting -->|linear release| DevTeam(("Dev Team / Advisor"))
-
-    Investor -->|stake VNDC| StakingContract[StakingContract]
-    StakingContract -->|principal + rewards| Investor
-```
+![VNDC Architecture](Update.png)
 
 ## 2.1 Architecture
 
