@@ -33,9 +33,24 @@ const deployTokenSale: DeployFunction = async function (hre: HardhatRuntimeEnvir
 
   log(`TokenSale deployed at: ${tokenSale.address}`);
 
-  // Transfer VNDC ownership to TokenSale so it becomes the sole minter
+  // Mint tokens to owner for reward pool funding before transferring ownership
   const vndcContract = await ethers.getContractAt("VNDC", vndcAddress);
   const currentOwner = await vndcContract.owner();
+  
+  if (currentOwner.toLowerCase() === deployer.toLowerCase()) {
+    // Mint tokens to owner for staking reward pool (1M tokens)
+    const rewardPoolAmount = ethers.parseEther("1000000");
+    log(`Minting ${ethers.formatEther(rewardPoolAmount)} VNDC to owner for reward pool...`);
+    try {
+      const mintTx = await vndcContract.mint(deployer, rewardPoolAmount);
+      await mintTx.wait();
+      log("✅ Reward pool tokens minted to owner");
+    } catch (error: any) {
+      log(`⚠️ Could not mint reward pool tokens: ${error.message}`);
+    }
+  }
+
+  // Transfer VNDC ownership to TokenSale so it becomes the sole minter
   if (currentOwner.toLowerCase() !== tokenSale.address.toLowerCase()) {
     log("Transferring VNDC ownership to TokenSale...");
     const transferTx = await vndcContract.transferOwnership(tokenSale.address);

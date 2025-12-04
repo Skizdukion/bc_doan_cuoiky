@@ -41,7 +41,7 @@ Script dùng để trình bày miệng theo từng đề mục trong `Progress_R
     - Token lõi, kế thừa chuẩn ERC‑20 của OpenZeppelin nên tương thích với hầu hết ví và DEX.  
     - Tích hợp `mint`, `burn`, `pause` và cơ chế chống reentrancy. Quan trọng nhất: ngay sau deploy, quyền `mint`(ownerShip) được chuyển hẳn sang `TokenSale`, không nằm trên ví dev → giảm rủi ro bị hack ví hoặc cố ý in token vô hạn.  
   - `TokenSale`:
-    - Đóng vai trò “cửa ngõ” phát hành toàn bộ VNDC ra thị trường, hoạt động theo mô hình ICO fixed‑price (giá bán token cố định trong suốt thời gian sale).  
+    - Đóng vai trò “cửa ngõ” phát hành toàn bộ VNDC ra thị trường, hoạt động theo mô hình ICO linh hoạt: ghi nhận tổng ETH raise được và chỉ mint 30% cho investor theo tỷ lệ góp vốn sau khi soft cap đạt, nên giá thực tế phụ thuộc lượng vốn thay vì cố định trước.  
     - Nhận ETH từ nhà đầu tư, ghi nhận số VNDC mà mỗi ví sẽ được nhận, nhưng CHƯA mint ngay, đồng thời kiểm soát logic soft cap / hard cap và thời điểm kết thúc sale.  
     - Chỉ sau khi đạt soft cap và được gọi `finalize`, `TokenSale` mới mint tổng lượng VNDC cần thiết và phân bổ thành 3 phần: 30% cho investor, 40% gửi sang `TokenVesting`, 30% giữ lại để bơm thanh khoản.  
   - `TokenVesting`:
@@ -59,7 +59,7 @@ Script dùng để trình bày miệng theo từng đề mục trong `Progress_R
 **Operational Flow (4 bước chi tiết với ví dụ):**  
 1. **Investor gửi ETH vào `TokenSale`:**  
    - Ví dụ: 5 investor gửi lần lượt 5, 10, 15, 10 và 10 ETH, tổng cộng 50 ETH.  
-   - Mỗi lần nhận ETH, `TokenSale` tính số VNDC tương ứng theo giá cố định và ghi vào mapping nội bộ; investor mới chỉ “giữ chỗ” quyền nhận token, VNDC thực tế chưa được mint.  
+   - Contract chỉ ghi nhận số ETH và quyền claim VNDC theo tỷ lệ góp vốn; chưa có VNDC nào được mint.  
 
 2. **Kết thúc sale – đạt hoặc không đạt soft cap:**  
    - Trường hợp **không đạt soft cap**: sau khi sale kết thúc mà tổng ETH < 50 ETH, owner dừng sale, nhà đầu tư có thể gọi hàm refund để nhận lại toàn bộ số ETH đã góp; các quyền claim VNDC bị huỷ.  

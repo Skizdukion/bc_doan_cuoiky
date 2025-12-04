@@ -126,6 +126,38 @@ const addLiquidity: DeployFunction = async function (hre: HardhatRuntimeEnvironm
     log("⚠️ VNDC/WETH pair not found.");
   }
 
+  // Fund staking reward pool if on local network
+  if (isLocalNetwork) {
+    log("----------------------------------------------------");
+    log("Funding StakingContract reward pool...");
+    try {
+      const staking = await deployments.get("StakingContract");
+      const stakingContract = await ethers.getContractAt("StakingContract", staking.address);
+      const rewardPool = await stakingContract.rewardPool();
+      
+      if (rewardPool === 0n) {
+        const rewardPoolAmount = ethers.parseEther("1000000"); // 1M tokens
+        const vndcContract = await ethers.getContractAt("VNDC", vndc.address);
+        const ownerBalance = await vndcContract.balanceOf(deployer);
+        
+        if (ownerBalance >= rewardPoolAmount) {
+          log(`Funding reward pool with ${ethers.formatEther(rewardPoolAmount)} VNDC...`);
+          await vndcContract.approve(staking.address, rewardPoolAmount);
+          const fundTx = await stakingContract.fundRewardPool(rewardPoolAmount);
+          await fundTx.wait();
+          log("✅ Reward pool funded successfully");
+        } else {
+          log(`⚠️ Owner balance (${ethers.formatEther(ownerBalance)}) insufficient to fund reward pool`);
+          log(`   Required: ${ethers.formatEther(rewardPoolAmount)} VNDC`);
+        }
+      } else {
+        log(`✅ Reward pool already funded: ${ethers.formatEther(rewardPool)} VNDC`);
+      }
+    } catch (error: any) {
+      log(`⚠️ Could not fund reward pool: ${error.message}`);
+    }
+  }
+
   return true;
 };
 
