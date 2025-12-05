@@ -51,13 +51,14 @@ contract StakingContract is Ownable, ReentrancyGuard {
     uint256 public constant EARLY_WITHDRAWAL_PENALTY = 5000; // 50% in basis points
     uint256 public constant MIN_STAKE = 1000 * 10**18; // 1000 tokens minimum
 
-    // Dynamic APY Boost System
-    uint256 public baselineTVL;                      // Baseline TVL for drop detection
-    uint256 public constant TVL_DROP_THRESHOLD = 1000; // 10% = 1000 basis points
-    uint256 public constant APY_BOOST_MULTIPLIER = 15000; // 1.5x = 15000 basis points (15000/10000)
+    // Dynamic APY Boost System (Monotonically Decreasing)
+    // APY boost increases when TVL/totalSupply ratio is LOW
+    // Higher ratio = Lower boost (monotonically decreasing)
+    uint256 public constant MAX_APY_BOOST_MULTIPLIER = 20000; // 2x cap in basis points
+    uint256 public currentAPYBoostMultiplier;         // Boost multiplier (basis points, 10000 = 1x)
     bool public apyBoostActive;                       // Whether APY boost is currently active
-    uint256 public apyBoostStartTime;                 // When boost was activated
-    uint256 public constant APY_BOOST_DURATION = 7 days; // Boost lasts 7 days
+    uint256 public apyBoostStartTime;                 // When boost was last updated
+    uint256 public constant APY_BOOST_UPDATE_INTERVAL = 1 days; // Update boost every day
 
     // Events
     event StakeCreated(
@@ -86,9 +87,7 @@ contract StakingContract is Ownable, ReentrancyGuard {
     );
     event RewardPoolFunded(address indexed funder, uint256 amount);
     event TierUpdated(uint256 tier, uint256 lockDuration, uint256 apy, uint256 minStake);
-    event BaselineTVLUpdated(uint256 oldBaseline, uint256 newBaseline);
-    event APYBoostActivated(uint256 tvlDropPercent, uint256 newTier1APY, uint256 newTier2APY, uint256 newTier3APY);
-    event APYBoostDeactivated();
+    event APYBoostUpdated(uint256 tvlRatio, uint256 boostMultiplier, uint256 newTier1APY, uint256 newTier2APY, uint256 newTier3APY);
 
     /**
      * @dev Constructor
@@ -120,8 +119,8 @@ contract StakingContract is Ownable, ReentrancyGuard {
             minStake: MIN_STAKE
         });
 
-        // Initialize baseline TVL to 0 (will be set after first staking)
-        baselineTVL = 0;
+        // Initialize boost system
+        currentAPYBoostMultiplier = 10000; // 1x (no boost initially)
         apyBoostActive = false;
     }
 
@@ -168,8 +167,8 @@ contract StakingContract is Ownable, ReentrancyGuard {
         totalStakes++;
         totalStaked += _amount;
 
-        // Check if we need to update baseline or trigger APY boost
-        _checkAndUpdateTVL();
+        // Update APY boost based on current TVL ratio
+        _updateAPYBoost();
 
         emit StakeCreated(stakeId, msg.sender, _amount, _tier, tier.lockDuration);
     }
@@ -197,8 +196,8 @@ contract StakingContract is Ownable, ReentrancyGuard {
         stakeInfo.active = false;
         totalStaked -= stakeInfo.amount;
 
-        // Check if TVL drop triggers APY boost
-        _checkAndUpdateTVL();
+        // Update APY boost based on current TVL ratio
+        _updateAPYBoost();
 
         // Transfer staked amount
         token.safeTransfer(msg.sender, stakeInfo.amount);
@@ -284,7 +283,7 @@ contract StakingContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Get effective APY for a tier (with boost if active)
+     * @dev Get effective APY for a tier (with boost based on TVL ratio)
      * @param _tier Tier number
      * @return Effective APY in basis points
      */
@@ -293,18 +292,8 @@ contract StakingContract is Ownable, ReentrancyGuard {
         
         uint256 baseAPY = tiers[_tier].apy;
         
-        // Check if boost is active and not expired
-        if (apyBoostActive) {
-            if (block.timestamp <= apyBoostStartTime + APY_BOOST_DURATION) {
-                // Apply boost: baseAPY * 1.5
-                return (baseAPY * APY_BOOST_MULTIPLIER) / 10000;
-            } else {
-                // Boost expired, deactivate it (will be cleaned up on next check)
-                return baseAPY;
-            }
-        }
-        
-        return baseAPY;
+        // Always apply current boost multiplier (updated based on TVL ratio)
+        return (baseAPY * currentAPYBoostMultiplier) / 10000;
     }
 
     /**
@@ -422,83 +411,74 @@ contract StakingContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Set baseline TVL (owner only, or can be called automatically)
-     * @param _baselineTVL The baseline TVL value
+     * @dev Update APY boost based on current TVL/totalSupply ratio
+     * Monotonically Decreasing: Lower ratio = Higher boost
+     * Called automatically on stake/unstake
      */
-    function setBaselineTVL(uint256 _baselineTVL) external onlyOwner {
-        uint256 oldBaseline = baselineTVL;
-        baselineTVL = _baselineTVL;
-        emit BaselineTVLUpdated(oldBaseline, _baselineTVL);
-    }
-
-    /**
-     * @dev Check TVL drop and activate APY boost if needed
-     * Called automatically on stake/unstake, or can be called manually
-     */
-    function _checkAndUpdateTVL() internal {
-        // If boost is active but expired, deactivate it
-        if (apyBoostActive && block.timestamp > apyBoostStartTime + APY_BOOST_DURATION) {
-            apyBoostActive = false;
-            emit APYBoostDeactivated();
-        }
-
-        // If baseline is 0, set it to current TVL (first time setup)
-        if (baselineTVL == 0 && totalStaked > 0) {
-            baselineTVL = totalStaked;
-            emit BaselineTVLUpdated(0, totalStaked);
+    function _updateAPYBoost() internal {
+        uint256 mintedSupply = token.totalSupply();
+        if (mintedSupply == 0) {
+            currentAPYBoostMultiplier = 10000; // 1x (no boost)
             return;
         }
 
-        // Don't check if baseline is not set or boost already active
-        if (baselineTVL == 0 || apyBoostActive) {
-            return;
-        }
+        // Calculate TVL ratio: totalStaked / totalSupply (in basis points)
+        uint256 tvlRatio = (totalStaked * 10000) / mintedSupply;
 
-        // Calculate TVL drop percentage
-        if (totalStaked < baselineTVL) {
-            uint256 drop = baselineTVL - totalStaked;
-            uint256 dropPercent = (drop * 10000) / baselineTVL; // In basis points
-
-            // If drop >= 10% (1000 basis points), activate boost
-            if (dropPercent >= TVL_DROP_THRESHOLD) {
-                _activateAPYBoost();
-            }
-        }
-    }
-
-    /**
-     * @dev Activate APY boost by updating tier APYs
-     */
-    function _activateAPYBoost() internal {
-        require(!apyBoostActive, "StakingContract: Boost already active");
-
-        // Calculate boosted APYs (1.5x multiplier)
-        uint256 newTier1APY = (tiers[1].apy * APY_BOOST_MULTIPLIER) / 10000;
-        uint256 newTier2APY = (tiers[2].apy * APY_BOOST_MULTIPLIER) / 10000;
-        uint256 newTier3APY = (tiers[3].apy * APY_BOOST_MULTIPLIER) / 10000;
-
-        // Update tiers with boosted APY
-        tiers[1].apy = newTier1APY;
-        tiers[2].apy = newTier2APY;
-        tiers[3].apy = newTier3APY;
-
-        // Activate boost
-        apyBoostActive = true;
+        // Calculate boost multiplier based on ratio (monotonically decreasing)
+        // Lower ratio = Higher boost
+        currentAPYBoostMultiplier = _calculateBoostMultiplier(tvlRatio);
+        
+        // Update timestamp
         apyBoostStartTime = block.timestamp;
+        apyBoostActive = currentAPYBoostMultiplier > 10000;
 
-        emit APYBoostActivated(
-            ((baselineTVL - totalStaked) * 10000) / baselineTVL,
-            newTier1APY,
-            newTier2APY,
-            newTier3APY
+        emit APYBoostUpdated(
+            tvlRatio,
+            currentAPYBoostMultiplier,
+            (tiers[1].apy * currentAPYBoostMultiplier) / 10000,
+            (tiers[2].apy * currentAPYBoostMultiplier) / 10000,
+            (tiers[3].apy * currentAPYBoostMultiplier) / 10000
         );
     }
 
     /**
-     * @dev Manually check and update TVL (public function for external calls)
+     * @dev Calculate boost multiplier based on TVL ratio (monotonically decreasing)
+     * @param tvlRatio TVL ratio in basis points (totalStaked * 10000 / totalSupply)
+     * @return Boost multiplier in basis points
+     * 
+     * Ratio < 10% (1000 bp): 2.0x boost (highest - encourage staking)
+     * Ratio 10-20% (1000-2000 bp): 1.75x boost
+     * Ratio 20-30% (2000-3000 bp): 1.5x boost
+     * Ratio 30-40% (3000-4000 bp): 1.25x boost
+     * Ratio >= 40% (>=4000 bp): 1.0x boost (no boost - enough staking)
      */
-    function checkAndUpdateTVL() external {
-        _checkAndUpdateTVL();
+    function _calculateBoostMultiplier(uint256 tvlRatio) internal pure returns (uint256) {
+        if (tvlRatio < 1000) {
+            // TVL < 10% of supply: Maximum boost
+            return MAX_APY_BOOST_MULTIPLIER; // 2.0x
+        }
+        if (tvlRatio < 2000) {
+            // TVL 10-20% of supply: High boost
+            return 17500; // 1.75x
+        }
+        if (tvlRatio < 3000) {
+            // TVL 20-30% of supply: Medium boost
+            return 15000; // 1.5x
+        }
+        if (tvlRatio < 4000) {
+            // TVL 30-40% of supply: Low boost
+            return 12500; // 1.25x
+        }
+        // TVL >= 40% of supply: No boost
+        return 10000; // 1.0x (no boost)
+    }
+
+    /**
+     * @dev Manually update APY boost (public function for external calls)
+     */
+    function updateAPYBoost() external {
+        _updateAPYBoost();
     }
 
     /**
@@ -509,21 +489,22 @@ contract StakingContract is Ownable, ReentrancyGuard {
         view 
         returns (
             bool active,
-            uint256 startTime,
-            uint256 duration,
-            uint256 timeRemaining
+            uint256 multiplier,
+            uint256 tvlRatio,
+            uint256 totalStakedAmount,
+            uint256 totalSupplyAmount
         ) 
     {
-        if (!apyBoostActive) {
-            return (false, 0, APY_BOOST_DURATION, 0);
-        }
-
-        uint256 elapsed = block.timestamp - apyBoostStartTime;
-        uint256 remaining = elapsed < APY_BOOST_DURATION 
-            ? APY_BOOST_DURATION - elapsed 
-            : 0;
-
-        return (apyBoostActive, apyBoostStartTime, APY_BOOST_DURATION, remaining);
+        uint256 mintedSupply = token.totalSupply();
+        uint256 ratio = mintedSupply > 0 ? (totalStaked * 10000) / mintedSupply : 0;
+        
+        return (
+            apyBoostActive,
+            currentAPYBoostMultiplier,
+            ratio,
+            totalStaked,
+            mintedSupply
+        );
     }
 }
 

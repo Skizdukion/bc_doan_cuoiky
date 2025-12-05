@@ -171,10 +171,11 @@ async function main() {
     console.log(`3. Stake details (ID: ${stakeId}):`);
     console.log(`   Amount: ${ethers.formatEther(stakeInfo[1])} VNDC`);
     console.log(`   Lock duration: ${stakeInfo[3]} seconds (${Number(stakeInfo[3]) / (30 * 24 * 60 * 60)} months)`);
-    // APY is stored in basis points (800 = 8%, 1200 = 12%, 1800 = 18%)
-    const apyBasisPoints = Number(stakeInfo[4]);
-    const apyPercent = apyBasisPoints / 10000; // Convert basis points to percentage
-    console.log(`   APY: ${apyPercent}% (${apyBasisPoints} basis points)`);
+    // Get effective APY (with boost applied based on TVL ratio)
+    const effectiveAPY = await staking.getEffectiveAPY(stakeInfo[4]); // stakeInfo[4] is tier
+    const apyBasisPoints = Number(effectiveAPY);
+    const apyPercent = apyBasisPoints / 100; // APY stored in basis points (800 = 8%)
+    console.log(`   Effective APY: ${apyPercent}% (${apyBasisPoints} basis points)`);
     const unlockTimestamp = Number(stakeInfo[7]);
     if (unlockTimestamp > 1000000000) { // Valid timestamp check (after year 2001)
       console.log(`   Unlock time: ${new Date(unlockTimestamp * 1000).toLocaleString()}`);
@@ -188,23 +189,40 @@ async function main() {
     console.log();
   }
 
-  // Set baseline TVL in the contract (this is what the contract uses for drop detection)
-  // NOTE: In production, baseline TVL should be updated periodically (daily/weekly)
-  // For this test, we use the TVL after initial staking as the baseline
-  const baselineTVL = newTVL;
-  await staking.connect(owner).setBaselineTVL(baselineTVL);
-  console.log(`3. Baseline TVL established in contract: ${ethers.formatEther(baselineTVL)} VNDC`);
-  console.log(`   📌 Contract will automatically detect TVL drops from this baseline`);
-  console.log(`   📌 In production: Baseline would be updated periodically (e.g., daily/weekly)\n`);
+  // Get current TVL ratio and boost status
+  const totalSupply = await vndc.totalSupply();
+  const tvlRatio = totalSupply > 0n ? Number((newTVL * 10000n) / totalSupply) / 100 : 0;
+  const boostStatus = await staking.getAPYBoostStatus();
+  let currentMultiplier = Number(boostStatus[1]) / 10000;
+  
+  // If multiplier is 0, it means contract hasn't been updated yet - force update
+  if (currentMultiplier === 0) {
+    console.log(`   ⚠️  Multiplier is 0, forcing contract to update...`);
+    try {
+      await (staking as any).updateAPYBoost();
+      const updatedStatus = await staking.getAPYBoostStatus();
+      currentMultiplier = Number(updatedStatus[1]) / 10000;
+    } catch (e) {
+      console.log(`   ⚠️  Could not force update: ${e}`);
+    }
+  }
+  
+  console.log(`3. TVL Ratio Analysis:`);
+  console.log(`   Total Staked (TVL): ${ethers.formatEther(newTVL)} VNDC`);
+  console.log(`   Total Minted Supply: ${ethers.formatEther(totalSupply)} VNDC`);
+  console.log(`   TVL Ratio: ${tvlRatio.toFixed(2)}%`);
+  console.log(`   📌 Contract uses TVL/totalSupply ratio to determine APY boost`);
+  console.log(`   📌 Monotonically Decreasing: Lower ratio = Higher APY boost`);
+  console.log(`   📌 Current Boost Multiplier: ${currentMultiplier.toFixed(2)}x (${boostStatus[1]} basis points)\n`);
 
   // Get current tier APYs for comparison
   const tier1Before = await staking.getTier(1);
   const tier2Before = await staking.getTier(2);
   const tier3Before = await staking.getTier(3);
-  console.log("   Current APY rates:");
-  console.log(`   Tier 1 (1 month): ${Number(tier1Before.apy) / 10000}%`);
-  console.log(`   Tier 2 (3 months): ${Number(tier2Before.apy) / 10000}%`);
-  console.log(`   Tier 3 (6 months): ${Number(tier3Before.apy) / 10000}%\n`);
+  console.log("   Base APY rates (before boost):");
+  console.log(`   Tier 1 (1 month): ${Number(tier1Before.apy) / 100}%`);
+  console.log(`   Tier 2 (3 months): ${Number(tier2Before.apy) / 100}%`);
+  console.log(`   Tier 3 (6 months): ${Number(tier3Before.apy) / 100}%\n`);
 
   // Advance time to accrue some rewards before panic (simulate normal market conditions)
   // This makes the penalty meaningful when investors unstake early
@@ -214,16 +232,20 @@ async function main() {
   console.log(`   ⏰ Advanced time by 7 days to accrue rewards`);
   
   // Simulate additional staking activity (normal growth scenario)
-  // In real system, baseline would update to reflect this growth
   const statsAfterTime = await staking.getStats();
   const currentTVLAfterTime = statsAfterTime[1];
-  console.log(`   📊 Current TVL after 7 days: ${ethers.formatEther(currentTVLAfterTime)} VNDC`);
+  const totalSupplyAfterTime = await vndc.totalSupply();
+  const tvlRatioAfterTime = totalSupplyAfterTime > 0n 
+    ? Number((currentTVLAfterTime * 10000n) / totalSupplyAfterTime) / 100 
+    : 0;
   
-  if (currentTVLAfterTime > baselineTVL) {
-    const growth = currentTVLAfterTime - baselineTVL;
+  console.log(`   📊 Current TVL after 7 days: ${ethers.formatEther(currentTVLAfterTime)} VNDC`);
+  console.log(`   📊 TVL Ratio: ${tvlRatioAfterTime.toFixed(2)}% of total supply`);
+  
+  if (currentTVLAfterTime > newTVL) {
+    const growth = currentTVLAfterTime - newTVL;
     console.log(`   📈 TVL Growth: +${ethers.formatEther(growth)} VNDC (new stakers joined)`);
-    console.log(`   ⚠️  Note: In production, baseline would update to ${ethers.formatEther(currentTVLAfterTime)} VNDC`);
-    console.log(`      to account for normal growth before measuring panic drops\n`);
+    console.log(`   📉 Higher ratio = Lower boost (monotonically decreasing)\n`);
   } else {
     console.log(`   ℹ️  TVL unchanged (no new stakers in this period)\n`);
   }
@@ -320,50 +342,112 @@ async function main() {
   // Check TVL after panic unstaking
   const statsAfterPanic = await staking.getStats();
   const panicTVL = statsAfterPanic[1];
-  const tvlDrop = baselineTVL - panicTVL;
-  const tvlDropPercent = baselineTVL > 0n 
-    ? Number((tvlDrop * 10000n) / baselineTVL) / 100 
+  const tvlDrop = newTVL - panicTVL;
+  
+  // Get total minted supply for ratio calculation
+  const totalMintedSupply = await vndc.totalSupply();
+  
+  // Calculate TVL ratio after panic
+  const panicTVLRatio = totalMintedSupply > 0n 
+    ? Number((panicTVL * 10000n) / totalMintedSupply) / 100 
+    : 0;
+  
+  // Calculate ratio before panic for comparison
+  const initialTVLRatio = totalMintedSupply > 0n 
+    ? Number((newTVL * 10000n) / totalMintedSupply) / 100 
     : 0;
 
   console.log("5. TVL Impact Analysis:");
-  console.log(`   Baseline TVL (reference point): ${ethers.formatEther(baselineTVL)} VNDC`);
-  console.log(`   Current TVL (after panic): ${ethers.formatEther(panicTVL)} VNDC`);
+  console.log(`   Total Minted Supply: ${ethers.formatEther(totalMintedSupply)} VNDC`);
+  console.log(`   Initial TVL: ${ethers.formatEther(newTVL)} VNDC (${initialTVLRatio.toFixed(2)}% of supply)`);
+  console.log(`   Current TVL (after panic): ${ethers.formatEther(panicTVL)} VNDC (${panicTVLRatio.toFixed(2)}% of supply)`);
   console.log(`   TVL Drop: ${ethers.formatEther(tvlDrop)} VNDC`);
-  console.log(`   TVL Drop Percentage: ${tvlDropPercent.toFixed(2)}%`);
-  console.log(`   📌 Drop measured from baseline (${ethers.formatEther(baselineTVL)} VNDC)`);
-  console.log(`   📌 If baseline updated with growth, drop would be measured from higher value\n`);
+  console.log(`   Ratio Change: ${initialTVLRatio.toFixed(2)}% → ${panicTVLRatio.toFixed(2)}%`);
+  console.log(`   📌 Lower ratio = Higher APY boost (monotonically decreasing)\n`);
 
-  // Check if contract automatically activated APY boost
-  // The contract checks TVL drop on every unstake and activates boost automatically
-  console.log("6. Checking contract for automatic APY boost activation...");
+  // Check current APY boost status (updated automatically on unstake)
+  console.log("6. Checking APY boost status after panic...");
   
-  // Force contract to check TVL (in case it wasn't triggered automatically)
-  await staking.checkAndUpdateTVL();
+  // Force contract to update boost (in case it wasn't triggered automatically)
+  // Note: Boost is updated automatically on stake/unstake, but we can force update
+  try {
+    await (staking as any).updateAPYBoost();
+  } catch (e) {
+    // Function might not exist in old contract version, that's OK
+  }
   
   // Get boost status from contract
-  const boostStatus = await staking.getAPYBoostStatus();
-  const isBoostActive = boostStatus[0];
+  const boostStatusAfter = await staking.getAPYBoostStatus();
+  const isBoostActive = boostStatusAfter[0];
+  let currentMultiplierAfter = Number(boostStatusAfter[1]) / 10000; // multiplier in basis points (10000 = 1x)
+  const currentTVLRatioBasisPoints = Number(boostStatusAfter[2]); // ratio in basis points (10000 = 100%)
+  const currentTVLRatio = currentTVLRatioBasisPoints / 100; // convert to percentage
+  
+  // Debug: Also get values directly to verify
+  const totalStakedFromContract = boostStatusAfter[3];
+  const totalSupplyFromContract = boostStatusAfter[4];
+  const calculatedRatio = totalSupplyFromContract > 0n 
+    ? Number((totalStakedFromContract * 10000n) / totalSupplyFromContract) / 100 
+    : 0;
+  
+  // If multiplier is still 0 after update, there might be an issue
+  if (currentMultiplierAfter === 0 && totalSupplyFromContract > 0n) {
+    console.log(`   ⚠️  Multiplier is still 0, this indicates a problem with contract state`);
+    console.log(`   ⚠️  Expected multiplier based on ratio ${calculatedRatio.toFixed(2)}%:`);
+    if (calculatedRatio < 10) {
+      console.log(`      Should be 2.0x (ratio < 10%)`);
+    } else if (calculatedRatio < 20) {
+      console.log(`      Should be 1.75x (ratio 10-20%)`);
+    } else if (calculatedRatio < 30) {
+      console.log(`      Should be 1.5x (ratio 20-30%)`);
+    } else if (calculatedRatio < 40) {
+      console.log(`      Should be 1.25x (ratio 30-40%)`);
+    } else {
+      console.log(`      Should be 1.0x (ratio >= 40%)`);
+    }
+  }
+  
+  console.log(`   Total Staked (from contract): ${ethers.formatEther(totalStakedFromContract)} VNDC`);
+  console.log(`   Total Supply (from contract): ${ethers.formatEther(totalSupplyFromContract)} VNDC`);
+  console.log(`   Calculated Ratio: ${calculatedRatio.toFixed(2)}%`);
+  console.log(`   Ratio from contract: ${currentTVLRatio.toFixed(2)}% (${currentTVLRatioBasisPoints} basis points)`);
+  console.log(`   Current Boost Multiplier: ${currentMultiplierAfter.toFixed(2)}x (${boostStatusAfter[1]} basis points)`);
   
   if (isBoostActive) {
-    console.log("   🚨 DYNAMIC APY BOOST ACTIVATED BY CONTRACT 🚨");
-    console.log(`   TVL dropped ${tvlDropPercent.toFixed(2)}% (threshold: 10%)`);
-    console.log(`   Contract automatically activated 50% APY boost\n`);
-
-    // Get boosted APYs from contract
-    const tier1After = await staking.getTier(1);
-    const tier2After = await staking.getTier(2);
-    const tier3After = await staking.getTier(3);
+    console.log("   🚨 APY BOOST ACTIVE (Low TVL Ratio) 🚨");
     
-    console.log("   ✓ APY Boost Applied by Contract:");
-    console.log(`     Tier 1: ${Number(tier1Before.apy) / 10000}% → ${Number(tier1After.apy) / 10000}% (+${(Number(tier1After.apy) - Number(tier1Before.apy)) / 10000}%)`);
-    console.log(`     Tier 2: ${Number(tier2Before.apy) / 10000}% → ${Number(tier2After.apy) / 10000}% (+${(Number(tier2After.apy) - Number(tier2Before.apy)) / 10000}%)`);
-    console.log(`     Tier 3: ${Number(tier3Before.apy) / 10000}% → ${Number(tier3After.apy) / 10000}% (+${(Number(tier3After.apy) - Number(tier3Before.apy)) / 10000}%)\n`);
+    // Determine boost tier based on TVL ratio
+    let boostTier = "";
+    if (currentTVLRatio < 10) {
+      boostTier = "MAXIMUM (TVL < 10% of supply)";
+    } else if (currentTVLRatio < 20) {
+      boostTier = "HIGH (TVL 10-20% of supply)";
+    } else if (currentTVLRatio < 30) {
+      boostTier = "MEDIUM (TVL 20-30% of supply)";
+    } else if (currentTVLRatio < 40) {
+      boostTier = "LOW (TVL 30-40% of supply)";
+    } else {
+      boostTier = "NONE (TVL ≥ 40% of supply)";
+    }
+    
+    console.log(`   Boost Tier: ${boostTier}`);
+    console.log(`   📉 Monotonically Decreasing: Lower ratio = Higher boost\n`);
+
+    // Get effective APYs (with boost applied dynamically)
+    const effectiveAPY1 = await staking.getEffectiveAPY(1);
+    const effectiveAPY2 = await staking.getEffectiveAPY(2);
+    const effectiveAPY3 = await staking.getEffectiveAPY(3);
+    
+    console.log("   ✓ Effective APY with Boost (via getEffectiveAPY):");
+    console.log(`     Tier 1: ${Number(tier1Before.apy) / 100}% → ${Number(effectiveAPY1) / 100}% (${currentMultiplierAfter.toFixed(2)}x boost)`);
+    console.log(`     Tier 2: ${Number(tier2Before.apy) / 100}% → ${Number(effectiveAPY2) / 100}% (${currentMultiplierAfter.toFixed(2)}x boost)`);
+    console.log(`     Tier 3: ${Number(tier3Before.apy) / 100}% → ${Number(effectiveAPY3) / 100}% (${currentMultiplierAfter.toFixed(2)}x boost)\n`);
 
     console.log("   📈 Impact:");
     console.log("   - Higher APY attracts new stakers");
     console.log("   - Existing stakers see increased rewards (via getEffectiveAPY)");
     console.log("   - Panic selling is discouraged by higher returns");
-    console.log(`   - Boost duration: ${Number(boostStatus[3]) / (24 * 60 * 60)} days remaining\n`);
+    console.log("   - Boost updates in real-time as TVL ratio changes\n");
 
     // Demonstrate recovery: Investor 3 sees the boost and stakes more
     const investor3NewBalance = await vndc.balanceOf(investor3.address);
@@ -375,38 +459,44 @@ async function main() {
         
         // Get effective APY that will be used for this new stake
         const effectiveAPY = await staking.getEffectiveAPY(3);
+        const effectiveAPYPercent = Number(effectiveAPY) / 100; // APY in basis points (1800 = 18%)
         console.log(`   ✓ Investor3 (smart money) stakes additional ${ethers.formatEther(additionalStake)} VNDC`);
-        console.log(`     Taking advantage of boosted ${Number(effectiveAPY) / 10000}% APY (from contract)\n`);
+        console.log(`     Taking advantage of boosted ${effectiveAPYPercent}% APY (from contract)\n`);
       }
     }
 
     // Check recovery TVL
     const recoveryStats = await staking.getStats();
     const recoveryTVL = recoveryStats[1];
-    const tvlRecovery = recoveryTVL - panicTVL;
-    const recoveryPercent = panicTVL > 0n 
-      ? Number((tvlRecovery * 10000n) / baselineTVL) / 100 
+    const recoveryTotalSupply = await vndc.totalSupply();
+    const recoveryTVLRatio = recoveryTotalSupply > 0n 
+      ? Number((recoveryTVL * 10000n) / recoveryTotalSupply) / 100 
       : 0;
+    const tvlRecovery = recoveryTVL - panicTVL;
+    const ratioRecovery = recoveryTVLRatio - panicTVLRatio;
 
     console.log("7. Recovery Metrics:");
     console.log(`   TVL after boost: ${ethers.formatEther(recoveryTVL)} VNDC`);
+    console.log(`   TVL Ratio: ${recoveryTVLRatio.toFixed(2)}% of supply`);
     console.log(`   TVL Recovery: ${ethers.formatEther(tvlRecovery)} VNDC`);
-    console.log(`   Recovery from baseline: ${recoveryPercent.toFixed(2)}%\n`);
+    console.log(`   Ratio Recovery: ${ratioRecovery > 0 ? '+' : ''}${ratioRecovery.toFixed(2)}%`);
+    console.log(`   📉 As ratio increases, boost decreases (monotonically)\n`);
   } else {
     console.log("6. APY Boost Status:");
-    console.log(`   TVL drop (${tvlDropPercent.toFixed(2)}%) is below threshold (10%)`);
-    console.log("   Contract did not activate APY boost - system stable\n");
+    console.log(`   TVL ratio (${currentTVLRatio.toFixed(2)}%) is >= 40% of supply`);
+    console.log("   No boost active - sufficient staking ratio\n");
   }
 
   // Final validation
   console.log("8. Final Validation:");
   console.log("   ✓ Panic scenario successfully simulated");
   console.log("   ✓ Early withdrawal penalties applied (50% of rewards)");
-  console.log("   ✓ TVL drop calculated and monitored");
+  console.log("   ✓ TVL ratio calculated vs TOTAL MINTED SUPPLY");
   if (isBoostActive) {
-    console.log("   ✓ Dynamic APY boost automatically activated by CONTRACT");
-    console.log("   ✓ Boost applied to all tiers (read from contract)");
-    console.log("   ✓ Recovery mechanism demonstrated");
+    console.log("   ✓ Dynamic APY boost automatically updated by CONTRACT");
+    console.log("   ✓ Monotonically decreasing boost: Lower TVL ratio = Higher boost");
+    console.log("   ✓ Boost multiplier applied dynamically (not permanently modifying tiers)");
+    console.log("   ✓ Recovery mechanism: Higher APY encourages more staking");
   }
   console.log("   ✓ Staggered unlock tiers prevent mass exit");
   console.log("   ✓ System demonstrates resilience during market dumps");

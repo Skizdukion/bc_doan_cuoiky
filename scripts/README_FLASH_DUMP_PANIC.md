@@ -43,14 +43,22 @@ This scenario demonstrates:
 
 ## Key Features
 
-### Automatic TVL Drop Detection
-The contract monitors TVL continuously. When tokens are unstaked, it automatically checks if the drop exceeds the threshold.
+### Automatic TVL Ratio Monitoring
+The contract monitors TVL ratio (totalStaked / totalSupply) continuously. When tokens are staked or unstaked, it automatically updates the APY boost multiplier based on the current ratio. This ensures the boost is always proportional to the actual staking participation rate.
 
-### Dynamic APY Boost
-- **Trigger**: TVL drops by 10% or more from baseline
-- **Effect**: All tier APYs increase by 50%
-- **Duration**: Boost lasts for a fixed period
+### Dynamic APY Boost (Monotonically Decreasing)
+- **Trigger**: Based on **TVL/totalSupply ratio** (not drop percentage)
+- **Effect**: Boost multiplier increases when TVL ratio is LOW (monotonically decreasing):
+  - **TVL < 10% of supply**: 2.0x multiplier (100% APY increase, maximum boost)
+  - **TVL 10-20% of supply**: 1.75x multiplier (75% APY increase)
+  - **TVL 20-30% of supply**: 1.5x multiplier (50% APY increase)
+  - **TVL 30-40% of supply**: 1.25x multiplier (25% APY increase)
+  - **TVL ≥ 40% of supply**: 1.0x multiplier (no boost)
+- **Monotonic**: Lower TVL ratio always results in equal or higher boost (never decreases for lower ratios)
+- **Real-time**: Boost updates automatically on every stake/unstake
 - **Automatic**: No manual intervention required
+- **Dynamic Application**: Boost is applied dynamically via `getEffectiveAPY()`, not by permanently modifying tier APYs
+- **Economic Logic**: When few tokens are staked (low ratio), higher APY encourages more staking
 
 ### Early Withdrawal Penalty
 Investors who unstake before their lock period ends lose 50% of their accrued rewards. This discourages panic selling.
@@ -83,10 +91,13 @@ yarn hardhat run scripts/flash_dump_panic.ts --network localhost
 
 The APY boost mechanism is **fully implemented in the contract**, not just simulated in the script:
 
-- **Baseline TVL**: Stored in contract, can be updated by owner
-- **Automatic Detection**: Contract checks TVL on every stake/unstake
-- **Automatic Boost**: Contract updates tier APYs when threshold is met
-- **Reward Calculation**: Uses boosted APY automatically via `getEffectiveAPY()`
+- **TVL Ratio Calculation**: Contract calculates `totalStaked / totalSupply` on every stake/unstake
+- **Total Supply Comparison**: Boost is based on TVL ratio vs total minted supply
+- **Automatic Update**: Contract updates boost multiplier automatically on every stake/unstake
+- **Monotonically Decreasing**: Lower TVL ratio = Higher boost multiplier (1.0x to 2.0x)
+- **Dynamic Application**: Boost multiplier stored in `currentAPYBoostMultiplier` and applied via `getEffectiveAPY()`
+- **Reward Calculation**: Uses boosted APY automatically via `getEffectiveAPY()` - tier APYs are not permanently modified
+- **Real-time Response**: Boost updates immediately when TVL ratio changes
 
 The script only:
 - Sets up the scenario
@@ -95,24 +106,33 @@ The script only:
 
 ## Expected Outcomes
 
-✅ **TVL Drop Detected**: Contract automatically measures drop from baseline  
-✅ **APY Boost Activated**: Contract increases all tier APYs by 50%  
+✅ **TVL Ratio Calculated**: Contract automatically calculates TVL/totalSupply ratio  
+✅ **APY Boost Updated**: Contract applies monotonically decreasing boost (2.0x to 1.0x based on ratio)  
+✅ **Monotonic Behavior**: Lower TVL ratios always result in equal or higher boost multipliers  
 ✅ **Penalties Applied**: Early unstakers lose 50% of rewards  
-✅ **Recovery Demonstrated**: New stakers enter at boosted rates  
+✅ **Recovery Demonstrated**: Higher APY (when ratio is low) encourages more staking  
 ✅ **System Resilience**: Mechanisms work as designed during crisis  
 
 ## Key Takeaways
 
 1. **Fully Automated**: All detection and boost logic is in the smart contract
 2. **On-Chain Verification**: Everything is verifiable on the blockchain
-3. **Real-Time Response**: Boost activates immediately when threshold is met
-4. **Economic Incentives**: Higher APY encourages staking during panic
-5. **Penalty Deterrent**: Early withdrawal penalty discourages panic selling
+3. **Real-Time Response**: Boost updates immediately when TVL ratio changes
+4. **Monotonically Decreasing**: Lower TVL ratio = Higher boost (2.0x to 1.0x) - encourages staking when participation is low
+5. **Total Supply Normalization**: Ratio measured against total minted supply for accurate comparison
+6. **Economic Incentives**: Higher APY when few tokens are staked encourages more participation
+7. **Penalty Deterrent**: Early withdrawal penalty discourages panic selling
+8. **Dynamic Application**: Boost applied via multiplier, tier APYs remain unchanged
+9. **Self-Balancing**: As more tokens are staked (ratio increases), boost decreases naturally
 
 ## Notes
 
-- The baseline TVL should be updated periodically in production (e.g., daily/weekly) to account for normal growth
-- The boost duration is fixed and will automatically deactivate after the period ends
-- Existing stakers benefit from boosted APY for new rewards calculations
-- The system is designed to be resilient during market volatility
+- **TVL Ratio Based**: The contract uses TVL/totalSupply ratio, not drop percentage. This ensures boost is always proportional to actual staking participation.
+- **Monotonically Decreasing**: The boost multiplier decreases as TVL ratio increases. When ratio is low (<10%), boost is maximum (2.0x). When ratio is high (≥40%), there's no boost (1.0x).
+- **Real-time Updates**: Boost updates automatically on every stake/unstake operation - no fixed duration or manual intervention needed.
+- **Dynamic Application**: Boost is applied dynamically via `getEffectiveAPY()` - tier APYs in storage remain unchanged.
+- **Existing Stakers**: All existing stakers benefit from boosted APY for new rewards calculations via `getEffectiveAPY()`.
+- **Self-Balancing Mechanism**: As more tokens are staked (ratio increases), boost naturally decreases, creating a self-balancing system.
+- **Economic Logic**: When few tokens are staked, higher APY incentivizes more staking. When many tokens are already staked, lower boost is sufficient.
+- **System Resilience**: The system is designed to be resilient during market volatility with automatic, proportional responses based on actual participation rates.
 
