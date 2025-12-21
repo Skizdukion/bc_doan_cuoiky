@@ -1,0 +1,562 @@
+(base) ➜  bc_doan_cuoiky git:(master) ✗ yarn hardhat run scripts/liquidity_withdrawal_mitigation.ts --network localhost
+yarn run v1.22.22
+$ /home/lpk/bc_doan_cuoiky/node_modules/.bin/hardhat run scripts/liquidity_withdrawal_mitigation.ts --network localhost
+WARNING: You are currently using Node.js v18.20.8, which is not supported by Hardhat. This can lead to unexpected behavior. See https://v2.hardhat.org/nodejs-versions
+
+
+Network: localhost (chainId: 31337)
+=== STRESS SCENARIO 2: LIQUIDITY WITHDRAWAL MITIGATION ===
+
+Testing: LP tokens locked in TokenSale
+
+1. Checking liquidity status...
+   TokenSale address: 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853
+   VNDC address: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+   WETH address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+
+   LP Pair Address: 0x87Ebc9e0643bFE6603C6350b55aa348E9cc9557F
+
+2. LP token balance in TokenSale: 38729.833462074168850792 LP tokens
+
+3. Analyzing TokenSale contract...
+   Checking for withdraw/removeLiquidity functions...
+
+   Functions in TokenSale related to liquidity:
+   - LIQUIDITY_SHARE_BPS
+   - liquidityAdded
+   - totalLiquidityAllocation
+
+4. Attempting to remove liquidity (attacker perspective)...
+   Attacker tries to call removeLiquidityETH on router...
+
+   Attacker LP balance: 0.0 LP tokens
+   ✓ Attacker has no LP tokens
+   ✓ Cannot call removeLiquidity without LP tokens
+
+   ✓ LP tokens in TokenSale cannot be transferred
+   ✓ TokenSale has no function to approve/transfer LP tokens
+   ✓ Router.removeLiquidityETH requires LP token approval
+
+5. Verification:
+   ✓ LP tokens are locked in TokenSale contract
+   ✓ TokenSale has no withdraw/removeLiquidity function
+   ✓ Attacker cannot call removeLiquidity without LP token approval
+   ✓ Even owner cannot remove liquidity (no function exists)
+   ✓ Liquidity protection validated
+
+=== SCENARIO 2 VALIDATED ===
+
+Conclusion: LP tokens are permanently locked in TokenSale,
+preventing any rug pull attempts through liquidity withdrawal.
+
+Done in 2.25s.
+
+##### Logs on local node 
+
+eth_chainId
+  Contract deployment: <UnrecognizedContract>
+  Contract address:    0x5fbdb2315678afecb367f032d93f642f64180aa3
+  Transaction:         0x8a98bcc3eae9a30cf460a8bedcb87c3066d804dbbfcc648212499b7e42504b20
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            817067 of 817067
+  Block #1:            0x99cc09d36cf694a6359c45142d8f7ad230b5f1139e20a2b7af0c2dfa6c89a6b3
+  Contract deployment: MockERC20
+  Contract address:    0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Transaction:         0x03df3c9f5ccd2185be34a4764fa3b62b02f3b43a6b20df1506e4b8e17ee2493c
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            1581853 of 1581853
+  Block #2:            0x82978a695c1cd38b52f2d074b986dee261e19ca5d5cc21b819f4b0251827c829
+  Contract deployment: MockERC20
+  Contract address:    0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Transaction:         0x470e3d7194449d2c801dbd26bc55ca650fd13785485461e21861a11a4013ed16
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            1581853 of 1581853
+  Block #3:            0x78c70017d9e2176392b48bb2dccd1799d50d99c857d7bc038b32f5fc6218bf39
+  Contract deployment: MockERC20
+  Contract address:    0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9
+  Transaction:         0x700f96cd040eec532f2e5e85aad5ab2f719365817f3c7567865e04dba8002f87
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            1541621 of 1541621
+  Block #4:            0xc8f64224dcbd5045a6ccfd93137f1c8e617e5d95675a75a81355f1f3da28ac69
+  Contract deployment: VNDC
+  Contract address:    0xdc64a140aa3e981100a9beca4e685f962f0cf6c9
+  Transaction:         0x42ba93849aecb0c2a04ecff3ae0e425a65be3012f0b030b0d3063e263d3421a0
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            2105461 of 2105461
+  Block #5:            0x6c0151c022112bf231165c636128f4bf5145a84c7e2ede8726ff24311127f4e6
+  Contract deployment: PoolFactory
+  Contract address:    0x5fc8d32690cc91d4c39d9d3abcbd16989f875707
+  Transaction:         0xe8d6cb6bb9632d75f46ca017818b92ee1ed83f76d374e641bb58d59c8abe3f95
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            4971512 of 4971512
+  Block #6:            0x57b21daa6d240b5399429be415283f29c30a23a318f849ef4651a091105836dd
+  Contract deployment: Router
+  Contract address:    0x0165878a594ca255338adfa4d48449f69242eb8f
+  Transaction:         0xab168e15cdacb2322d74507fca1e64827bf536283d33bc30b1cf7736aff77955
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            5218223 of 5218223
+  Block #7:            0x966ebf2b021c192d974087c95c532563349a145c6c96ddcdc814ef857139b468
+  Contract deployment: TokenSale
+  Contract address:    0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Transaction:         0xefa422af504261a5ba72aed7cf3f01e8ef1dc3a1c79a200e1310caae2af5b879
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            3655283 of 3655283
+  Block #8:            0x0ae93d3749850c3f38cc420cdf354ad68309e63e83e4f93b369ee8f56d5020bb
+  Contract call:       VNDC#owner
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xdc64a140aa3e981100a9beca4e685f962f0cf6c9
+  Contract call:       VNDC#mint
+  Transaction:         0x11eb2f2a45de338b5a2b2fc5e2062c0daf0d59c49c1dbc7f62753d63a41bdc66
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xdc64a140aa3e981100a9beca4e685f962f0cf6c9
+  Value:               0 ETH
+  Gas used:            73394 of 30000000
+  Block #9:            0xdd02ba4c310f84862953e89d2c60c6497d9935849283add391971b9c7233fe8c
+  Contract call:       VNDC#transferOwnership
+  Transaction:         0xc0e8120d3c34e9a42df15973bcde40347cb02667bb4a1baa78f59365eda2e8fa
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xdc64a140aa3e981100a9beca4e685f962f0cf6c9
+  Value:               0 ETH
+  Gas used:            29111 of 30000000
+  Block #10:           0xd4971fecc58909e3e43d25d6b60b13509224eb1d77c5eb7c62c044001e0455c7
+  Contract deployment: TokenVesting
+  Contract address:    0x610178da211fef7d417bc0e6fed39f05609ad788
+  Transaction:         0x49832d79cda3295f04b3d1d84cbc26726ea5cba217e4a60092764678d88dbb09
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            2949933 of 2949933
+  Block #11:           0xf065c385c976a3c4a8f7a1f8ded14f1c0253744a76dee1ca7c0ac77a03c561ba
+  Contract call:       TokenSale#tokenVesting
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#setTokenVesting
+  Transaction:         0xfc01d13065dc19c288d0791b1588713c3d4d3feed5f5ce62ae3878c123986471
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               0 ETH
+  Gas used:            47922 of 30000000
+  Block #12:           0xfd2033b0f8588b9f05ad52491655893e3b4f640f0205c558507da5b10560f99e
+  Contract deployment: StakingContract
+  Contract address:    0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0
+  Transaction:         0x637cf3e957ee526a2ed0a7104f21a43cdca7e9a6d67ce1fb5f2c707870bf2cc8
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  Value:               0 ETH
+  Gas used:            3322913 of 3322913
+  Block #13:           0x47de26e40acf944177d4b2e4f3847e60b22d4cca25d3148be8988e20fbe5cf1f
+  Contract call:       TokenSale#saleActive
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#softCapReached
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#totalRaised
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#SOFT_CAP
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#MAX_PURCHASE
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#MIN_PURCHASE
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#startSale
+  Transaction:         0x6ce656062b6d7a1df7efc61425d70b7a4004220ecfd20999666417f07cacb471
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               0 ETH
+  Gas used:            96426 of 30000000
+  Block #14:           0x7c1ba839adc8482500bd4c6a28abf3dd0cbbd51f32f9e52d5266572f387a30ba
+  Contract call:       TokenSale#buyTokens
+  Transaction:         0x67117441e5bdfa64cc34ae640fff10136d8660a1afbc78112df51f4420cd1e4e
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               10. ETH
+  Gas used:            130072 of 30000000
+  Block #15:           0x44b9cf2556d31f4626a66f49b6ec46035688578a7a9d886a0b7056e257d17468
+  Contract call:       TokenSale#buyTokens
+  Transaction:         0xd9ef73098dea20ac3618721fb929a1d11debe94d8fc66119ad43bfc3ea1c2f80
+  From:                0x70997970c51812dc3a010c7d01b50e0d17dc79c8
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               10. ETH
+  Gas used:            95872 of 30000000
+  Block #16:           0xd48d0d9b29fdad526a160d1f95e4e08a1f930f380c0bd0a2dadd6713c4c7df0d
+  Contract call:       TokenSale#buyTokens
+  Transaction:         0x2ad92548d3af8e018a089afeeb0a89752ad2c94dd9415dda0d7eb2334fcda36f
+  From:                0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               10. ETH
+  Gas used:            95872 of 30000000
+  Block #17:           0x995bbf2d2780e31efb1959c684582ce08072b8fb30d1866ed07d74ff4752bcde
+  Contract call:       TokenSale#buyTokens
+  Transaction:         0x3c9e52fbf72f50ebf14332f7f6c5b485a44e425ac0eb84e3d3f95b4c9deb738f
+  From:                0x90f79bf6eb2c4f870365e785982e1f101e93b906
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               10. ETH
+  Gas used:            95872 of 30000000
+  Block #18:           0xbfad7ff755fb8bac6466075e91d15c54824fc694278bf425b9c5c22814d5f774
+  Contract call:       TokenSale#buyTokens
+  Transaction:         0x800099d596665e4075ab136e8f46f5cd2689f4dc90a7fd6aed93829207604b0a
+  From:                0x15d34aaf54267db7d7c367839aaf71a00a2c6a65
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               10. ETH
+  Gas used:            116039 of 30000000
+  Block #19:           0x58c636e2e6544909c9c3709aa9a25fe9c453ea93c280ab16a0f1f7a04ed309ba
+  Contract call:       TokenSale#softCapReached
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#saleActive
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#endSale
+  Transaction:         0xaf82a477da2b6de0721c26d361fd0d548c6bfc794e2f70206e57ead4ff835a06
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               0 ETH
+  Gas used:            27271 of 30000000
+  Block #20:           0x4d4b05e3c9b3340fffe8c560c7a4ad92042194034ca318aa33b3c668f59d00b0
+  Contract call:       TokenSale#dexRouter
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#finalized
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       TokenSale#finalizeSale
+  Transaction:         0x0374fd1dc3bfc39cfa1b28f809a7f7032ac3d4a64652f123b0e4d455fc691bef
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Value:               0 ETH
+  Gas used:            3891293 of 30000000
+  Block #21:           0x55cdc68f946dcf09c95ea3e9b60c93c11e2c5f29c2cef8d21b2ce41eaf8da22a
+  Contract call:       TokenSale#liquidityAdded
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa513e6e4b8f2a923d98304ec87f64353c4d5c853
+  Contract call:       PoolFactory#getPair
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fc8d32690cc91d4c39d9d3abcbd16989f875707
+  Contract call:       StakingContract#rewardPool
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0
+  Contract call:       VNDC#balanceOf
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xdc64a140aa3e981100a9beca4e685f962f0cf6c9
+  Contract call:       VNDC#approve
+  Transaction:         0xd6a02b02b7efe6bb0ca1fe7f9478506de3a27e13be135bc5f39a78cca9a3df3a
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xdc64a140aa3e981100a9beca4e685f962f0cf6c9
+  Value:               0 ETH
+  Gas used:            46929 of 30000000
+  Block #22:           0x84b7c59104b30e496cbbcd1ff6f71fe14c3cc859baaa41ea3e5943adfec4c4b2
+  Contract call:       StakingContract#fundRewardPool
+  Transaction:         0x8964e207b15528f6c63f0ebb367bc62f872a44cff5648241c7d72eeda4fd433f
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0
+  Value:               0 ETH
+  Gas used:            81589 of 30000000
+  Block #23:           0x47a18ecfaff5c39070c58d5f47d9fdb55cf7452e379496d3f9dc1886841b5e62
+  Contract call:       MockERC20#transfer
+  Transaction:         0x6a656fa03e2f2c5901d495927303ff5ee8a32800a8f1e5f89b1d7bd42ed58da7
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #24:           0xb06de5ab25d2378c13567cdb9c0f3b38785e3d54e733995a9b8ee5f4b98df4e6
+  Contract call:       MockERC20#transfer
+  Transaction:         0x481045fa656e24154822776b91e71249374bcab714c1bd2a9d7a8e76ca4d8b9a
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #25:           0xc99c645bb6544be9de6590839b4cedd625574ae69b788de538dbb719079ccc4b
+  Contract call:       MockERC20#transfer
+  Transaction:         0x63f42a4ac41306598bd4a70f1d2e3c39b50293019f50834ede45e53b2ed769fa
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51790 of 30000000
+  Block #26:           0xb3ec1e0dddb41795d154dc43c7420ebbe741c2e0954b7541476ed009c5a15565
+  Contract call:       MockERC20#transfer
+  Transaction:         0x99ac950aa9cfdc09d03d6ffb50e0c68cd0baa5fc18a6c3785b16f61a1acf7a8d
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51790 of 30000000
+  Block #27:           0xa06c766f9387ec65d24493c909da7f62ecf6da5482c157c9c1ae1c2163c05964
+  Contract call:       MockERC20#transfer
+  Transaction:         0xa11ca98df09701f3e8d070c3f765cece4d4190edcc2d34290a976bee3f20c8bf
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #28:           0x0b9797686ae46416737d109bc633a3b4334c8ccfca5aa37cca15bbbcd51348b6
+  Contract call:       MockERC20#transfer
+  Transaction:         0xe6492e1a7984fe81a1745f751f157310b9ab0eb1141320065f94647545763e3e
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #29:           0xd9426eebc06ef588a0065b17b6b918834d252ac12b1a9d6505e3d1b49e0bcc01
+  Contract call:       MockERC20#transfer
+  Transaction:         0x4e9513b7ab7629521c8cb8fe57d7a23193e9be1046581a80b4cf7442efdbe8d6
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #30:           0x9d91a311210a3a4802f87ef0413c6159a7903be7cdeaedc57058bcfdef63ca5c
+  Contract call:       MockERC20#transfer
+  Transaction:         0x0fd0e63754f696b609261497277cb0086129cc89e3c8b2acb2f39da60912a7e3
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #31:           0x30b1a5e8894660f1da961adc4b26de58028153c8b2d0a40307f406c175c25caf
+  Contract call:       MockERC20#transfer
+  Transaction:         0xaafd4ed5741e17b9ecea1093dca45a27763d4fadf1dc9b1483b41fae27cd9801
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #32:           0x815e1a20895baf1a06f8ec6318b510f919b753d9c89c10d8df19b7902a8d247b
+  Contract call:       MockERC20#transfer
+  Transaction:         0xe6aeead5118bbfcd59e4dd804cb355dd83b65a421335a0905764936b4324c095
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #33:           0x3f84389595c4427b9bcbd27aa2f66f88b5d9ef8693b65c094dd1a49583ce95ad
+  Contract call:       MockERC20#transfer
+  Transaction:         0x327235d5c3624a9cd6a1608427194fa6f0727c5e3be5deeaa9560591828d5b71
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #34:           0x8ec811f3f1c67e74e9b1da9a90f52d4d73597ebb98a98f0077405cd83ad2f1f8
+  Contract call:       MockERC20#transfer
+  Transaction:         0x04fe2a5a1bfe32dec7992c2afe63b1b3748252796704a781edcfe881303c2ddc
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #35:           0x58426f93306860238d1a8fd9eaba79f1dec4b633259ddc7868fe06f39f4529e3
+  Contract call:       MockERC20#transfer
+  Transaction:         0x20f50d61e2f1432c94935599b5943c216b8650419e9ad2ef41dae3996ea7c77e
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #36:           0x30a94a70a38e8f7ad3ad8d69827364032c2584c7da543126a82fef199de85ea6
+  Contract call:       MockERC20#transfer
+  Transaction:         0xf9f5096882c534092d2c289d2406ce92c921c48e7581a38630572afe72af6978
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #37:           0xcfb7fd4ff56d4f4b1566bddb9fa5133a0d9a21cd72126a2f5effad24c99560d1
+  Contract call:       MockERC20#transfer
+  Transaction:         0x5752957df74080e0689c0f025b870692889b3bb17d5c8178f928668091534bee
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #38:           0xb61d43c3eea243d2c8652301353729d0bb185829c9612107c0fd61f386c9b6e7
+  Contract call:       MockERC20#transfer
+  Transaction:         0x0651503b8db1960b38291a1738ab7c7c3f9c07323e13d9efc74eba12238df2de
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #39:           0xe60b47e090bf93d76a9d763b8174c70885b3189d7e23383be237817c99b78c6e
+  Contract call:       MockERC20#transfer
+  Transaction:         0xd9e3b032ce08085dc541d321b0bab4731363a03d6d2c987ad96329a57559310f
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #40:           0x22a503c20d406350da8a0d2c5d8420139344f30177a0830c784aa19d37627498
+  Contract call:       MockERC20#transfer
+  Transaction:         0x3cc6bd37de5e17584aa852bc32c59bf02b7edc849795a2c004f8c1a459aad782
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #41:           0xbf390d55a183a3e95d9827cb87fae3f893cdedd08dabac7a9d561f4fad578d8d
+  Contract call:       MockERC20#transfer
+  Transaction:         0x62732c7f5de3a3aca1418173ce0f3286fc4d3f256061c483edc720950d4abe41
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51790 of 30000000
+  Block #42:           0xaf0913ae1799bf0a4ca1efd762ab1aee37dc31aa0d02273498b698bbe8122ef3
+  Contract call:       MockERC20#transfer
+  Transaction:         0xd568b0edff264ca0a57fe01016ddecf44738781f0716fc3d5470111ae690aaef
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51790 of 30000000
+  Block #43:           0x90389b297f849520caba2206d99607d9d8a43349055ceb1d2065c5337a44e24e
+  Contract call:       MockERC20#transfer
+  Transaction:         0x74e15f6f1cb11c3f87b32c9db1320222ebf4d06da8f1dd8e6e084ecbbfad4d18
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #44:           0x956c233b46ff2ed88b297e09f7c1d357851b859eda210e4b0ec82b37d64bf7c0
+  Contract call:       MockERC20#transfer
+  Transaction:         0x8c39e187e862dbada0d16bb2fa628cba132a017d6a146c49b5795530714709b7
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #45:           0x5036bd10bc588aaff79c5b8ea9e0b5331ccb1a82daf51329e51abc83607ce317
+  Contract call:       MockERC20#transfer
+  Transaction:         0x7c06708f009097170af50e110272f73040fe5ed7100ccfaabe64b3fd8721d4e8
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #46:           0xc52a7d1de20fb12dadebd01975456a641a917aa45625db3f03295ad401618847
+  Contract call:       MockERC20#transfer
+  Transaction:         0xff7a1ea72c0d43c79bd5081f949fe6a53c0416c21d21b3a1c660ecc64a54a35a
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #47:           0xed87f45cb8c57cfc01b61247074627552adfc423a14d340ad20d182fd0c86df3
+  Contract call:       MockERC20#transfer
+  Transaction:         0x2aa79e0e9c489c373f3e92739214bf37db572277a312eb0d9a688dd81b6beb5a
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #48:           0x56ca93b87d8d0ae6f9ff4471eaad7472b87cac08f0185d98ebb3089ecd2fec46
+  Contract call:       MockERC20#transfer
+  Transaction:         0x82fc7cf826350c26355bf83e41b0bcbc77973f8b8284b417a95cb807a9b5cd78
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #49:           0xae5f7af531f695987eead7dcc0dc4ab9e5b854bfcf6b62618f96c746a3b763d6
+  Contract call:       MockERC20#transfer
+  Transaction:         0x26fea7df249c673112407ea0491a70489bf396629cbb4d1053b7e122b3ffdc72
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #50:           0x9d8048cfb7a867058f2d0cdca9dafb335399122fe2ef2a112a4a25174498f064
+  Contract call:       MockERC20#transfer
+  Transaction:         0xfdd37a2bc57974d709f24f54b35b13629efa499d735e74bee297508fd6b70d45
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #51:           0x273c05e8e52900561901783bc0d15080761a21d8794e9205d4748daa8993636e
+  Contract call:       MockERC20#transfer
+  Transaction:         0xaed65250009e6ccf041750e6f4ff2248071e00a923ca198b2a659ded0330157c
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #52:           0xcb66cea9cf57b8b6f99ea661165f4e302bba0de8cbdcbc86fa32f165f20a4e81
+  Contract call:       MockERC20#transfer
+  Transaction:         0x052fa7b07ddb3422deb016ca92d8090e340479c6eea7bfa8c93fe7ce808f81b6
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #53:           0x29eb6d959963d12a5927115d7b0bd9bda24acb2f60700591d24edf103a95662b
+  Contract call:       MockERC20#transfer
+  Transaction:         0x62bd690d6697e910dbf6f37c4d246e76e3d22c734215ddca76c73ca43da6478c
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #54:           0x4663dddd80f0898c23e9b903d6944ca3fb5dd57a54a335d5246bfddd37fca83e
+  Contract call:       MockERC20#transfer
+  Transaction:         0xb510b6be5ec59cbd85f6be1ccdb55ad831b9048cdd058269e02b455a3850f6f7
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #55:           0xb6e79c805d95aa62ad8e2dbe09366b1c78918566173d9e8105d24ba3350d3fbc
+  Contract call:       MockERC20#transfer
+  Transaction:         0x62e76999c8b40e99dee519183e272cedf0fb94c4b9418f740f6e3c46ec4c9785
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #56:           0x8167b28eb99331315996f2347e4fe30cef22093e5e51f880ec1f819cd4fcafec
+  Contract call:       MockERC20#transfer
+  Transaction:         0x6be39a2bcda7abecddbb0c484f6b2b9d735fc10a770623c3e5bfdf3183ebc275
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #57:           0x3fc7e2436eb296d9894fbbeb755cd1ea7e0a9fecda3f4b76d9ff68914953ac63
+  Contract call:       MockERC20#transfer
+  Transaction:         0xe3f012cf641744994935425b9972a0f28ca419b405681facd38ecc4bf8b8e05a
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #58:           0x39307ee3f6a7a40e225821e5ba76130c7056f952b1eb6ad3b42bd18183972927
+  Contract call:       MockERC20#transfer
+  Transaction:         0x91601cc698efc1a1c5f8420dde4fedca7a2e0a15456318d8b3beb9e68c5c020e
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #59:           0xe17e656892c889ad8035d6bf91a28e0c1e8571c87a9cdd5c320102f13a4ef6bc
+  Contract call:       MockERC20#transfer
+  Transaction:         0xa101258837d94af490e16295f8878471758a70bbb2ce3c5bf95d224b568dabac
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0xe7f1725e7734ce288f8367e1bb143e90bb3f0512
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #60:           0x1d2c5524dac4af50e719a72aefd065c996d576f5066e9cbb1a6521f9f0f01093
+  Contract call:       MockERC20#transfer
+  Transaction:         0xd0bb72c9c18ab8cf3b3b1bdfb5368f4f586ba268babf7f362fc70207c755d34f
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0
+  Value:               0 ETH
+  Gas used:            51802 of 30000000
+  Block #61:           0x107105a48dee3209854c33480a329b2fe3404f83f729b635ea8eed05e6648da3
+eth_chainId (2)
+eth_accounts
+hardhat_metadata (20)
+eth_chainId
+eth_accounts
+hardhat_metadata (20)
+eth_accounts
+hardhat_metadata (20)
+eth_accounts
+hardhat_metadata (20)
+eth_accounts
+hardhat_metadata (20)
+eth_accounts
+hardhat_metadata (20)
+eth_accounts
+hardhat_metadata (20)
+eth_call
+  Contract call:       PoolFactory#getPair
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x5fc8d32690cc91d4c39d9d3abcbd16989f875707
+
+eth_accounts
+eth_call
+  Contract call:       PoolPair#balanceOf
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x87ebc9e0643bfe6603c6350b55aa348e9cc9557f
+
+eth_call
+  Contract call:       PoolPair#balanceOf
+  From:                0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  To:                  0x87ebc9e0643bfe6603c6350b55aa348e9cc9557f

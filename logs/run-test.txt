@@ -1,0 +1,110 @@
+(base) ➜  bc_doan_cuoiky git:(master) ✗ yarn hardhat test
+yarn run v1.22.22
+$ /home/lpk/bc_doan_cuoiky/node_modules/.bin/hardhat test
+WARNING: You are currently using Node.js v18.20.8, which is not supported by Hardhat. This can lead to unexpected behavior. See https://v2.hardhat.org/nodejs-versions
+
+  StakingContract
+    Deployment
+      ✔ Should set the right token address
+      ✔ Should set the right owner
+      ✔ Should have correct tier configurations
+    Funding Reward Pool
+      ✔ Should allow funding reward pool
+    Staking
+      ✔ Should allow users to stake tokens
+      ✔ Should not allow staking below minimum
+      ✔ Should not allow staking with invalid tier
+      ✔ Should track total staked
+    Rewards Calculation
+      ✔ Should calculate rewards correctly
+      ✔ Should return 0 rewards immediately after staking
+    Claiming Rewards
+      ✔ Should allow claiming rewards
+      ✔ Should update claimed rewards
+    Unstaking
+      ✔ Should allow unstaking after lock period
+      ✔ Should apply penalty for early withdrawal
+      ✔ Should not allow unstaking same stake twice
+    Compounding Rewards
+      ✔ Should allow compounding rewards
+
+  TokenSale
+    Deployment
+      ✔ Should set the right token address
+      ✔ Should set the right owner
+      ✔ Should have correct sale parameters
+    Starting Sale
+      ✔ Should allow owner to start sale
+      ✔ Should not allow non-owner to start sale
+      ✔ Should not allow starting sale twice
+    Buying Tokens
+      ✔ Should allow users to buy tokens
+      ✔ Should not allow purchase below minimum
+      ✔ Should not allow purchase above maximum
+      ✔ Should not allow purchase if sale not active
+      ✔ Should track individual contributions
+      ✔ Should not allow exceeding individual limit
+      ✔ Should mark soft cap as reached
+      ✔ Should end sale when hard cap reached
+    Refunds
+      ✔ Should allow refund if soft cap not reached
+      ✔ Should not allow refund if soft cap reached
+    Finalization and claims
+      ✔ Finalizes sale, mints allocations, and adds liquidity
+      ✔ Allows investor claims once finalized
+    Whitelist
+      ✔ Should not allow purchase if not whitelisted
+      ✔ Should allow purchase if whitelisted
+
+  TokenVesting
+    Deployment
+      ✔ Should set the right token address
+      ✔ Should set the right owner
+    Creating Vesting Schedule
+      ✔ Should create a vesting schedule
+      ✔ Should not allow creating duplicate schedule
+      ✔ Should create batch vesting schedules
+    Vesting Calculations
+      ✔ Should return 0 vested amount before cliff
+      ✔ Should return correct vested amount after cliff
+      ✔ Should return full amount after vesting period
+    Releasing Tokens
+      ✔ Should not allow release before cliff
+      ✔ Should allow release after cliff
+      ✔ Should allow anyone to release for beneficiary
+      ✔ Should allow multiple releases over time
+    Revoking Vesting
+      ✔ Should allow owner to revoke before cliff
+      ✔ Should not allow revoking after cliff
+      ✔ Should not allow revoking non-revocable vesting
+      ✔ Should return revoked tokens to owner
+
+  VNDC Token
+    Deployment
+      ✔ Should set the right owner
+      ✔ Should have correct name and symbol
+      ✔ Should have 18 decimals
+      ✔ Should start with zero supply
+    Minting
+      ✔ Should allow owner to mint tokens
+      ✔ Should not allow non-owner to mint
+      ✔ Should emit TokensMinted event
+      ✔ Should allow batch minting
+      ✔ Should revert batch mint with mismatched arrays
+    Burning
+      ✔ Should allow users to burn their own tokens
+      ✔ Should not allow burning more than balance
+    Pausing
+      ✔ Should allow owner to pause
+      ✔ Should not allow transfers when paused
+      ✔ Should not allow minting when paused
+      ✔ Should allow owner to unpause
+      ✔ Should allow transfers after unpause
+    Transfers
+      ✔ Should transfer tokens between users
+      ✔ Should not allow transfer of more than balance
+
+
+  70 passing (3s)
+
+Done in 4.22s.

@@ -134,8 +134,13 @@ describe("StakingContract", function () {
       await time.increase(30 * 24 * 60 * 60);
       
       const pendingRewards = await staking.getPendingRewards(0);
-      // Expected: STAKE_AMOUNT * 0.08 / 12 = STAKE_AMOUNT * 0.00667
-      const expectedReward = STAKE_AMOUNT * 8n / 100n / 12n;
+      
+      // Get effective APY (which includes boost multiplier based on TVL ratio)
+      const effectiveAPY = await staking.getEffectiveAPY(1);
+      
+      // Expected: STAKE_AMOUNT * (effectiveAPY / 12) / 10000
+      // effectiveAPY is in basis points, so divide by 10000
+      const expectedReward = (STAKE_AMOUNT * effectiveAPY) / (12n * 10000n);
       
       expect(pendingRewards).to.be.closeTo(expectedReward, ethers.parseEther("10"));
     });
